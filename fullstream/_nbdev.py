@@ -2,9 +2,10 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {}
+index = {"one_hot": "00_nn.ipynb",
+         "simple_classifier": "00_nn.ipynb"}
 
-modules = []
+modules = ["nn.py"]
 
 doc_url = "https://phinate.github.io/fullstream/"
 
