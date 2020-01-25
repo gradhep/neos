@@ -12,9 +12,6 @@ entries:
     - output: web,pdf
       title: fulstream.nn
       url: /nn
-    - output: web,pdf
-      title: Title
-      url: /jax_nn
     output: web
     title: fullstream
   output: web

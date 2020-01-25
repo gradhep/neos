@@ -1,7 +1,6 @@
 {
   "fullstream": {
     "Overview": "/",
-    "fulstream.nn": "/nn",
-    "Title": "/jax_nn"
+    "fulstream.nn": "/nn"
   }
 }
