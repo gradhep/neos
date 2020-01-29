@@ -10,8 +10,9 @@ from jax import jit, grad, random
 from jax.random import multivariate_normal, PRNGKey
 from jax.config import config
 from jax.experimental import optimizers
+# avoid those precision errors!
+config.update("jax_enable_x64", True)
 
-import numpy as onp
 import numpy.random as npr
 import itertools
 import time
@@ -25,11 +26,11 @@ def one_hot(x, k, dtype=np.float32):
 # Cell
 class simple_classifier:
     '''A simple classifier trained on separating two close normal distributions. Modelled after jax/examples/mnist_classifier.py.'''
-    def __init__(self,rng=PRNGKey(0), dist=1):
+    def __init__(self,rng=PRNGKey(0), dist=1, nodes=10):
 
         # Set up architecture
         self.init_random_params, self.predict = stax.serial(
-        Dense(10), Relu,
+        Dense(nodes), Relu,
         Dense(2), LogSoftmax)
 
         # save random seed and dist
@@ -50,8 +51,9 @@ class simple_classifier:
         # placeholder for neural network parameters
         self.params = []
 
-    def __call__(self,x):
-        return self.predict(self.params,x)
+    def __call__(self,x,params=None):
+        if params == None: params=self.params
+        return self.predict(params,x)
 
     def plot_train_data(self):
         plt.scatter(self.train_data[:,0], self.train_data[:,1],c=self.train_labels[:,0],alpha=0.2,s=1.4)
@@ -123,7 +125,7 @@ class simple_classifier:
         # keep trained parameters
         self.params = params
 
-    def plot_decision(self,plot_data=False):
+    def plot_decision(self,plot_data=False,cmap='plasma',levels=50):
         '''Helper function to plot decision contours of classifier.'''
         delta = 0.05
         x = np.arange(-2.0, 11.0, delta)
@@ -132,10 +134,12 @@ class simple_classifier:
         pairs = np.dstack([X, Y]).reshape(-1, 2)
         Z = np.exp(self.predict(self.params,pairs))[:,1].reshape(X.shape)
         fig, ax = plt.subplots()
-        CS = ax.contourf(X, Y, Z,cmap='magma')
-        ax.set_title('Decision contours of simple_classifier')
+        CS = ax.contourf(X, Y, Z,levels=levels,cmap=cmap)
+        #ax.set_title('Decision contours of simple_classifier')
         if plot_data:
-            ax.scatter(self.train_data[:,0], self.train_data[:,1],c=self.train_labels[:,0],alpha=0.2,s=1.4)
+            ax.scatter(self.train_data[:,0], self.train_data[:,1],c=self.train_labels[:,0],alpha=0.2,s=1.2)
+        plt.axis('off')
+        #plt.savefig("test.png", bbox_inches='tight',dpi=324)
         plt.show()
 
     def gen_sig(self,nev,rng=PRNGKey(21)):
@@ -146,13 +150,13 @@ class simple_classifier:
 
 
 # Cell
-def hists_from_nn(nn, sigevents, bkgevents, scale=False, use_jax=True):
+def hists_from_nn(nn, params, sigevents, bkgevents, scale=False, use_jax=True):
     '''Create nn-based binned summary statistics from signal and background events. nn must be callable.'''
     sig_sf = 0.02 if scale else 1
     bkg_sf = 0.1 if scale else 1
 
-    sighist = np.sum(np.exp(nn(sigevents)),axis=0)*sig_sf
-    bkghist = np.sum(np.exp(nn(bkgevents)),axis=0)*bkg_sf
+    sighist = np.sum(np.exp(nn(sigevents,params)),axis=0)*sig_sf
+    bkghist = np.sum(np.exp(nn(bkgevents,params)),axis=0)*bkg_sf
 
     if use_jax:
         return sighist, bkghist

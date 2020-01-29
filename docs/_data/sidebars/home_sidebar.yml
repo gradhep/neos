@@ -10,8 +10,11 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: fulstream.nn
+      title: fullstream.nn
       url: /nn
+    - output: web,pdf
+      title: fullstream.stats
+      url: /stats
     output: web
     title: fullstream
   output: web

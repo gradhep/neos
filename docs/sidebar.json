@@ -1,6 +1,7 @@
 {
   "fullstream": {
     "Overview": "/",
-    "fulstream.nn": "/nn"
+    "fullstream.nn": "/nn",
+    "fullstream.stats": "/stats"
   }
 }

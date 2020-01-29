@@ -1,8 +1,8 @@
-# Project name here
-> Summary description here.
+# fullstream
+> Upstream optimisation based on downstream inference.
 
 
-This file will become your README and also the index of your documentation.
+Leverages the shoulders of giants (pyhf, jax). Very much a WIP right now :)
 
 ## Install
 
@@ -10,15 +10,4 @@ This file will become your README and also the index of your documentation.
 
 ## How to use
 
-Fill me in please! Don't forget code examples:
-
-```python
-1+1
-```
-
-
-
-
-    2
-
-
+coming soon!
