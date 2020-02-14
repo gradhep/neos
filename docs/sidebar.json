@@ -2,6 +2,7 @@
   "fullstream": {
     "Overview": "/",
     "fullstream.nn": "/nn",
-    "fullstream.stats": "/stats"
+    "fullstream.stats": "/stats",
+    "Title": "/cls_nn_experiments"
   }
 }

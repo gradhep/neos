@@ -4,8 +4,10 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
 index = {"one_hot": "00_nn.ipynb",
          "simple_classifier": "00_nn.ipynb",
+         "three_blob_classifier": "00_nn.ipynb",
          "hists_from_nn": "01_stats.ipynb",
-         "simple_nn_logpdf": "01_stats.ipynb"}
+         "simple_nn_logpdf": "01_stats.ipynb",
+         "hists_from_nn_uncert": "01_stats.ipynb"}
 
 modules = ["nn.py",
            "stats.py"]
