@@ -13,11 +13,23 @@ entries:
       title: fullstream.nn
       url: /nn
     - output: web,pdf
-      title: fullstream.stats
-      url: /stats
+      title: fullstream.hists
+      url: /hists
     - output: web,pdf
-      title: Title
-      url: /cls_nn_experiments
+      title: fullstream.data
+      url: /data
+    - output: web,pdf
+      title: fullstream.models
+      url: /models
+    - output: web,pdf
+      title: fullstream.transforms
+      url: /transforms
+    - output: web,pdf
+      title: fullstream.fit
+      url: /fit
+    - output: web,pdf
+      title: fullstream.cls
+      url: /cls
     output: web
     title: fullstream
   output: web

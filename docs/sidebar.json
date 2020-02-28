@@ -2,7 +2,11 @@
   "fullstream": {
     "Overview": "/",
     "fullstream.nn": "/nn",
-    "fullstream.stats": "/stats",
-    "Title": "/cls_nn_experiments"
+    "fullstream.hists": "/hists",
+    "fullstream.data": "/data",
+    "fullstream.models": "/models",
+    "fullstream.transforms": "/transforms",
+    "fullstream.fit": "/fit",
+    "fullstream.cls": "/cls"
   }
 }

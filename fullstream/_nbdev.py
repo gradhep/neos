@@ -5,12 +5,28 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 index = {"one_hot": "00_nn.ipynb",
          "simple_classifier": "00_nn.ipynb",
          "three_blob_classifier": "00_nn.ipynb",
-         "hists_from_nn": "01_stats.ipynb",
-         "simple_nn_logpdf": "01_stats.ipynb",
-         "hists_from_nn_uncert": "01_stats.ipynb"}
+         "two_blob_classifier": "00_nn.ipynb",
+         "hists_from_nn": "01_hists.ipynb",
+         "hists_from_nn_bkg_var": "01_hists.ipynb",
+         "simple_nn_logpdf": "01_hists.ipynb",
+         "get_three_blobs": "02_data.ipynb",
+         "Model": "03_models.ipynb",
+         "hepdata_like": "03_models.ipynb",
+         "nn_model_maker": "03_models.ipynb",
+         "transform_lim_vec": "04_transforms.ipynb",
+         "transform_lim": "04_transforms.ipynb",
+         "inv_transform_lim_vec": "04_transforms.ipynb",
+         "inv_transform_lim": "04_transforms.ipynb",
+         "get_solvers": "05_fit.ipynb",
+         "cls_jax": "06_cls.ipynb"}
 
 modules = ["nn.py",
-           "stats.py"]
+           "hists.py",
+           "data.py",
+           "models.py",
+           "transforms.py",
+           "fit.py",
+           "cls.py"]
 
 doc_url = "https://phinate.github.io/fullstream/"
 
