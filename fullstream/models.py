@@ -50,6 +50,7 @@ class Model(object):
         mu, gamma = pars
         main = pyhf.probability.Poisson(main).log_prob(maindata)
         constraint = pyhf.probability.Poisson(gamma * self.factor).log_prob(auxdata)
+        # constraint = pyhf.probability.Normal(gamma,self.uncert/self.nominal).log_prob(1.0)
         return jax.numpy.asarray([main + constraint])
 
 

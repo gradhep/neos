@@ -7,26 +7,26 @@ import jax
 
 # Cell
 # [-inf, inf] -> [a,b] (vectors)
-def transform_lim_vec(param, bounds):
+def to_bounded_vec(param, bounds):
     a, b = bounds[:, 0], bounds[:, 1]
     return a + (b - a) * 0.5 * (jax.numpy.sin(param) + 1.0)
 
 
 # [-inf, inf] -> [a,b]
-def transform_lim(param, bounds):
+def to_bounded(param, bounds):
     a, b = bounds
     return a + (b - a) * 0.5 * (jax.numpy.sin(param) + 1.0)
 
 
 # [-inf, inf] <- [a,b] (vectors)
-def inv_transform_lim_vec(param, bounds):
+def toinf_vec(param, bounds):
     a, b = bounds[:, 0], bounds[:, 1]
     x = (2.0 * param - a) / (b - a) - 1.0
     return jax.numpy.arcsin(x)
 
 
 # [-inf, inf] <- [a,b]
-def inv_transform_lim(param, bounds):
+def toinf(param, bounds):
     a, b = bounds
     # print(f"a,b: {a,b}")
     x = (2.0 * param - a) / (b - a) - 1.0

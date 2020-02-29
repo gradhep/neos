@@ -5,8 +5,9 @@ __all__ = ['get_solvers']
 # Cell
 import jax
 from fax.implicit import twophase
+import jax.experimental.optimizers as optimizers
 
-from .transforms import *
+from .transforms import to_bounded_vec, toinf_vec, to_bounded, toinf
 
 # Cell
 def get_solvers(
@@ -14,22 +15,34 @@ def get_solvers(
     pdf_transform=False,
     default_rtol=1e-10,
     default_atol=1e-10,
-    default_max_iter=1000000,
+    default_max_iter=int(1e7),
+    learning_rate = 0.01
 ):
+
+    adam_init, adam_update, adam_get_params  = optimizers.adam(1e-6)
+
+
     def make_model(hyper_pars):
         constrained_mu, nn_pars = hyper_pars[0], hyper_pars[1]
         m, bonlypars = model_constructor(nn_pars)
 
-        bounds = m.config.suggested_bounds()
 
-        exp_bonly_data = m.expected_data(bonlypars, include_auxdata=True) + 0.2
+        bounds = m.config.suggested_bounds()
+        constrained_mu = toinf(constrained_mu,bounds[0]) if pdf_transform else constrained_mu
+
+        exp_bonly_data = m.expected_data(bonlypars, include_auxdata=True)
 
         def expected_logpdf(pars):  # maps pars to bounded space if pdf_transform = True
 
             return (
-                m.logpdf(transform_lim_vec(pars, bounds), exp_bonly_data)
+                m.logpdf(
+                    to_bounded_vec(pars, bounds), exp_bonly_data
+                )
                 if pdf_transform
-                else m.logpdf(pars, exp_bonly_data)
+                else
+                m.logpdf(
+                    pars, exp_bonly_data
+                )
             )
 
         def global_fit_objective(pars):  # NLL
@@ -41,23 +54,26 @@ def get_solvers(
             )
             return -expected_logpdf(pars)[0]
 
-        return constrained_mu, global_fit_objective, constrained_fit_objective
+        return constrained_mu, global_fit_objective, constrained_fit_objective,bounds
 
     def global_bestfit_minimized(hyper_param):
-        _, nll, _ = make_model(hyper_param)
+        _, nll, _ ,_ = make_model(hyper_param)
 
         def bestfit_via_grad_descent(i, param):  # gradient descent
-            param = param - jax.grad(nll)(param) * 0.01
+            g = jax.grad(nll)(param)
+            # param = param - g * learning_rate
+            param = adam_get_params(adam_update(i,g,adam_init(param)))
             return param
 
         return bestfit_via_grad_descent
 
     def constrained_bestfit_minimized(hyper_param):
-        mu, nll, cnll = make_model(hyper_param)
+        mu, nll, cnll,bounds = make_model(hyper_param)
 
         def bestfit_via_grad_descent(i, param):  # gradient descent
             _, np = param[0], param[1:]
-            np = np - jax.grad(cnll)(np) * 0.01
+            g = jax.grad(cnll)(np)
+            np = adam_get_params(adam_update(i,g,adam_init(np)))
             param = jax.numpy.concatenate([jax.numpy.asarray([mu]), np])
             return param
 
@@ -67,7 +83,7 @@ def get_solvers(
         param_func=global_bestfit_minimized,
         default_rtol=default_rtol,
         default_atol=default_atol,
-        default_max_iter=default_max_iter,
+        default_max_iter=default_max_iter
     )
     constrained_solver = twophase.two_phase_solver(
         param_func=constrained_bestfit_minimized,
@@ -77,9 +93,11 @@ def get_solvers(
     )
 
     def g_fitter(init, hyper_pars):
-        return global_solve(init, hyper_pars).value
+        solve = global_solve(init, hyper_pars)
+        return solve.value
 
     def c_fitter(init, hyper_pars):
-        return constrained_solver(init, hyper_pars).value
+        solve = constrained_solver(init, hyper_pars)
+        return solve.value
 
     return g_fitter, c_fitter

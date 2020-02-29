@@ -14,45 +14,49 @@ pyhf.set_backend(pyhf.tensor.jax_backend())
 
 from .fit import get_solvers
 from .models import nn_model_maker
-from .transforms import *
+from .transforms import to_bounded,to_bounded_vec,toinf,toinf_vec
 
 # Cell
-def cls_jax(nn_params, test_mu, transforms=False):
+def cls_maker(nn_model_maker, solver_kwargs):
+    def cls_jax(nn_params, test_mu):
+        g_fitter, c_fitter = get_solvers(nn_model_maker, **solver_kwargs)
 
-    g_fitter, c_fitter = get_solvers(nn_model_maker, transforms)
+        m, bonlypars = nn_model_maker(nn_params)
+        exp_data = m.expected_data(bonlypars)
+        bounds = m.config.suggested_bounds()
 
-    m, bonlypars = nn_model_maker(nn_params)
-    exp_data = m.expected_data(bonlypars)
-    bounds = m.config.suggested_bounds()
-
-    # map these
-    initval = jax.numpy.asarray([test_mu, 1.])
-    if transforms:
-        initval = inv_transform_lim_vec(initval, bounds)
-        init_test_mu = inv_transform_lim(test_mu, bounds[0])
+        # map these
+        initval = jax.numpy.asarray([test_mu, 1.])
+        transforms = solver_kwargs.get('pdf_transform',False)
+        if transforms:
+            initval = toinf_vec(initval, bounds)
 
 
-    # the constrained fit
-    numerator = transform_lim_vec(c_fitter(initval, [init_test_mu, nn_params]), bounds) if transforms else c_fitter(initval, [test_mu, nn_params])
+        # the constrained fit
 
-    denominator = transform_lim_vec(g_fitter(initval, [init_test_mu, nn_params]), bounds) if transforms else g_fitter(initval, [test_mu, nn_params])
+        # print('fitting constrained with init val %s setup %s', initval,[test_mu, nn_params])
 
-    print(f"constrained fit: {numerator}")
-    print(f"global fit: {denominator}")
+        numerator = to_bounded_vec(c_fitter(initval, [test_mu, nn_params]), bounds) if transforms else c_fitter(initval, [test_mu, nn_params])
 
-    # compute test statistic (lambda(µ))
-    profile_likelihood = -2 * (
-        m.logpdf(numerator, exp_data)[0] - m.logpdf(denominator, exp_data)[0]
-    )
+        denominator = bonlypars#to_bounded_vec(g_fitter(initval, [test_mu, nn_params]), bounds) if transforms else g_fitter(initval, [test_mu, nn_params])
 
-    # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
-    muhat = denominator[0]
-    sqrtqmu = jax.numpy.sqrt(jax.numpy.where(muhat < test_mu, profile_likelihood, 0.0))
-    #print(f"sqrt(q(mu)): {sqrtqmu}")
-    # compute CLs
-    nullval = sqrtqmu
-    altval = 0
-    CLsb = 1 - pyhf.tensorlib.normal_cdf(nullval)
-    CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
-    CLs = CLsb / CLb
-    return CLs
+        # print(f"constrained fit: {numerator}")
+        # print(f"global fit: {denominator}")
+
+        # compute test statistic (lambda(µ))
+        profile_likelihood = -2 * (
+            m.logpdf(numerator, exp_data)[0] - m.logpdf(denominator, exp_data)[0]
+        )
+
+        # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
+        muhat = denominator[0]
+        sqrtqmu = jax.numpy.sqrt(jax.numpy.where(muhat < test_mu, profile_likelihood, 0.0))
+        #print(f"sqrt(q(mu)): {sqrtqmu}")
+        # compute CLs
+        nullval = sqrtqmu
+        altval = 0
+        CLsb = 1 - pyhf.tensorlib.normal_cdf(nullval)
+        CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
+        CLs = CLsb / CLb
+        return CLs
+    return cls_jax
