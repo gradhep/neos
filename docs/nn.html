@@ -122,10 +122,10 @@ summary: "Module to easily call basic neural networks made in jax."
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">animation</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 
-<span class="n">animation</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animation2.mp4&quot;</span><span class="p">)</span>
+<span class="c1">#animation.save(&quot;animation2.mp4&quot;)</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
 
-<span class="n">HTML</span><span class="p">(</span><span class="n">animation</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+<span class="c1">#HTML(animation.to_html5_video())</span>
 </pre></div>
 
     </div>
@@ -1286,8 +1286,8 @@ Jal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjU4LjIwLjEwMA==
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">animation</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
 
-<span class="n">HTML</span><span class="p">(</span><span class="n">animation</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
-<span class="n">animation</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animationnn.gif&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="c1">#HTML(animation.to_html5_video())</span>
+<span class="c1">#animation.save(&quot;animationnn.gif&quot;, writer=&quot;imagemagick&quot;, fps=4)</span>
 </pre></div>
 
     </div>
@@ -1403,8 +1403,8 @@ Training set accuracy 0.87635
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">animation</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">HTML</span>
-
-<span class="n">HTML</span><span class="p">(</span><span class="n">animation</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+<span class="c1"># weird things happen with tests and animations...</span>
+<span class="c1">#HTML(animation.to_html5_video())</span>
 </pre></div>
 
     </div>

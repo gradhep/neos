@@ -30,9 +30,6 @@ entries:
     - output: web,pdf
       title: fullstream.cls
       url: /cls
-    - output: web,pdf
-      title: Title
-      url: /demo_training
     output: web
     title: fullstream
   output: web

@@ -5,6 +5,7 @@ __all__ = ['cls_maker']
 # Cell
 import jax
 from jax import config
+from jax.experimental import stax
 import pyhf
 
 # avoid those precision errors!
@@ -13,7 +14,6 @@ config.update("jax_enable_x64", True)
 pyhf.set_backend(pyhf.tensor.jax_backend())
 
 from .fit import get_solvers
-#from fullstream.models import nn_model_maker
 from .transforms import *
 
 # Cell

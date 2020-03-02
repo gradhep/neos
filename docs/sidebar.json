@@ -7,7 +7,6 @@
     "fullstream.models": "/models",
     "fullstream.transforms": "/transforms",
     "fullstream.fit": "/fit",
-    "fullstream.cls": "/cls",
-    "Title": "/demo_training"
+    "fullstream.cls": "/cls"
   }
 }
