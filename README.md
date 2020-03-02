@@ -1,6 +1,8 @@
 # neos
-> Upstream optimisation based on downstream inference.
+> nice end-to-end optimized statistics ;)
 
+
+<img src="logo.png" alt="logo" width="200">
 
 ![](training.gif)
 
