@@ -28,7 +28,7 @@ summary: "Surrogate module to temorarily replace pyhf functionality."
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="1-bin-pyhf">1-bin pyhf<a class="anchor-link" href="#1-bin-pyhf">&#182;</a></h3>
+<h3 id="multi-bin-pyhf">multi-bin pyhf<a class="anchor-link" href="#multi-bin-pyhf">&#182;</a></h3>
 </div>
 </div>
 </div>
@@ -64,9 +64,51 @@ summary: "Surrogate module to temorarily replace pyhf functionality."
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hepdata_like" class="doc_header"><code>hepdata_like</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/models.py#L56" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hepdata_like</code>(<strong><code>signal_data</code></strong>, <strong><code>bkg_data</code></strong>, <strong><code>bkg_uncerts</code></strong>, <strong><code>batch_size</code></strong>=<em><code>None</code></em>)</p>
+<h4 id="hepdata_like" class="doc_header"><code>hepdata_like</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/models.py#L57" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hepdata_like</code>(<strong><code>signal_data</code></strong>, <strong><code>bkg_data</code></strong>, <strong><code>bkg_uncerts</code></strong>, <strong><code>batch_size</code></strong>=<em><code>None</code></em>)</p>
 </blockquote>
 
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">sig</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">bkg</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">40</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">un</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="n">m</span> <span class="o">=</span> <span class="n">hepdata_like</span><span class="p">(</span><span class="n">sig</span><span class="p">,</span><span class="n">bkg</span><span class="p">,</span><span class="n">un</span><span class="p">)</span>
+<span class="n">d</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">expected_data</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">m</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">pars</span><span class="o">=</span><span class="p">[</span><span class="mf">1.</span><span class="p">,</span><span class="mf">1.</span><span class="p">],</span><span class="n">data</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/home/phinate/envs/fullstream/lib/python3.7/site-packages/jax-0.1.58-py3.7.egg/jax/lib/xla_bridge.py:119: UserWarning: No GPU/TPU found, falling back to CPU.
+</pre>
+</div>
+</div>
+
+<div class="output_area">
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>DeviceArray([-15.09130171], dtype=float64)</pre>
 </div>
 
 </div>
@@ -93,7 +135,7 @@ summary: "Surrogate module to temorarily replace pyhf functionality."
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="nn_model_maker" class="doc_header"><code>nn_model_maker</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/models.py#L60" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_model_maker</code>(<strong><code>nn_params</code></strong>)</p>
+<h4 id="nn_model_maker" class="doc_header"><code>nn_model_maker</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/models.py#L61" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_model_maker</code>(<strong><code>nn_params</code></strong>)</p>
 </blockquote>
 
 </div>
@@ -138,7 +180,7 @@ summary: "Surrogate module to temorarily replace pyhf functionality."
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Starting training...
-Epoch 0 in 4.89 sec
+Epoch 0 in 5.17 sec
 Training set accuracy 0.8476
 model: [ 6.40477037 13.59522963],[43.13707402  6.86292598],[4.44113382 4.44113382]
 </pre>
@@ -150,7 +192,7 @@ model: [ 6.40477037 13.59522963],[43.13707402  6.86292598],[4.44113382 4.4411338
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(&lt;fullstream.models.Model at 0x7f7b7c585210&gt;,
+<pre>(&lt;fullstream.models.Model at 0x7f9030162210&gt;,
  DeviceArray([0., 1.], dtype=float64))</pre>
 </div>
 

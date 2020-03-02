@@ -7,7 +7,7 @@ import jax
 from fax.implicit import twophase
 import jax.experimental.optimizers as optimizers
 
-from .transforms import to_bounded_vec, toinf_vec, to_bounded, toinf
+from .transforms import to_bounded_vec, to_inf_vec, to_bounded, to_inf
 
 # Cell
 def get_solvers(
@@ -28,7 +28,7 @@ def get_solvers(
 
 
         bounds = m.config.suggested_bounds()
-        constrained_mu = toinf(constrained_mu,bounds[0]) if pdf_transform else constrained_mu
+        constrained_mu = to_inf(constrained_mu,bounds[0]) if pdf_transform else constrained_mu
 
         exp_bonly_data = m.expected_data(bonlypars, include_auxdata=True)
 

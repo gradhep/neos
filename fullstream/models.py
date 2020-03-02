@@ -50,12 +50,12 @@ class Model(object):
         mu, gamma = pars
         main = pyhf.probability.Poisson(main).log_prob(maindata)
         constraint = pyhf.probability.Poisson(gamma * self.factor).log_prob(auxdata)
-        # constraint = pyhf.probability.Normal(gamma,self.uncert/self.nominal).log_prob(1.0)
-        return jax.numpy.asarray([main + constraint])
+        # sum log probs over bins
+        return jax.numpy.asarray([jax.numpy.sum(main + constraint,axis=0)])
 
 
 def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
-    return Model([signal_data[0], bkg_data[0], bkg_uncerts[0]])
+    return Model([signal_data, bkg_data, bkg_uncerts])
 
 # Cell
 def nn_model_maker(nn_params):
@@ -65,7 +65,7 @@ def nn_model_maker(nn_params):
     keys = [1, 2, 3]
     batch_size = 5000
     a, b, c = get_three_blobs(keys, batch_size)
-    s, b, db = hists_from_nn_bkg_var(predict, nn_params, a, jax.numpy.asarray([b,c]))
+    s, b, db = hists_from_nn_bkg_var(predict, nn_params, a, jax.numpy.asarray([b, c]))
 
     # arbitrary scaling:
     s, b, db = s / 5.0, b / 10.0, db / 10.0

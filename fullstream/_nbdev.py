@@ -13,12 +13,12 @@ index = {"one_hot": "00_nn.ipynb",
          "Model": "03_models.ipynb",
          "hepdata_like": "03_models.ipynb",
          "nn_model_maker": "03_models.ipynb",
-         "transform_lim_vec": "04_transforms.ipynb",
-         "transform_lim": "04_transforms.ipynb",
-         "inv_transform_lim_vec": "04_transforms.ipynb",
-         "inv_transform_lim": "04_transforms.ipynb",
+         "to_bounded_vec": "04_transforms.ipynb",
+         "to_bounded": "04_transforms.ipynb",
+         "to_inf_vec": "04_transforms.ipynb",
+         "to_inf": "04_transforms.ipynb",
          "get_solvers": "05_fit.ipynb",
-         "cls_jax": "06_cls.ipynb"}
+         "cls_maker": "06_cls.ipynb"}
 
 modules = ["nn.py",
            "hists.py",
