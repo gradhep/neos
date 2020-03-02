@@ -23,7 +23,7 @@ py_versions = '2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3
 requirements = cfg.get('requirements','').split()
 print(requirements)
 requirements += ['pyhf @ git+https://github.com/scikit-hep/pyhf@diffable_json']
-requirements += ['fax @ git+https://github.com/gehring/fax@master#egg=fax-0.0.4']
+requirements += ['fax @ git+https://github.com/gehring/fax.git']
 
 lic = licenses[cfg['license']]
 min_python = cfg['min_python']
