@@ -1,4 +1,4 @@
-# fullstream
+# neos
 > Upstream optimisation based on downstream inference.
 
 
@@ -8,7 +8,7 @@ Leverages the shoulders of giants (pyhf, jax). Very much a WIP right now :)
 
 ## Install
 
-`pip install fullstream`
+`pip install neos`
 
 ## How to use
 

@@ -1,6 +1,6 @@
 ---
 
-title: fullstream.hists
+title: neos.hists
 
 keywords: fastai
 sidebar: home_sidebar
@@ -38,7 +38,7 @@ summary: "Module for creating histograms based off of the output of neural net c
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hists_from_nn" class="doc_header"><code>hists_from_nn</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/hists.py#L13" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn</code>(<strong><code>nn</code></strong>, <strong><code>params</code></strong>, <strong><code>sig</code></strong>, <strong><code>bkg</code></strong>, <strong><code>scale</code></strong>=<em><code>True</code></em>, <strong><code>scale_factors</code></strong>=<em><code>[0.02, 0.1]</code></em>)</p>
+<h4 id="hists_from_nn" class="doc_header"><code>hists_from_nn</code><a href="https://github.com/phinate/neos/tree/master/neos/hists.py#L13" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn</code>(<strong><code>nn</code></strong>, <strong><code>params</code></strong>, <strong><code>sig</code></strong>, <strong><code>bkg</code></strong>, <strong><code>scale</code></strong>=<em><code>True</code></em>, <strong><code>scale_factors</code></strong>=<em><code>[0.02, 0.1]</code></em>)</p>
 </blockquote>
 <p>Create nn-based binned summary statistics from signal and background events.
 nn should be the 'predict', 'fit' etc. method that's callable on arguments (nn_params,data). Assumes logsoftmax output.</p>
@@ -56,7 +56,7 @@ nn should be the 'predict', 'fit' etc. method that's callable on arguments (nn_p
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fullstream.nn</span> <span class="kn">import</span> <span class="n">simple_classifier</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">neos.nn</span> <span class="kn">import</span> <span class="n">simple_classifier</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">simple_classifier</span><span class="p">(</span><span class="n">dist</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -83,7 +83,7 @@ nn should be the 'predict', 'fit' etc. method that's callable on arguments (nn_p
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Starting training...
-Epoch 0 in 5.08 sec
+Epoch 0 in 7.64 sec
 Training set accuracy 0.87475
 </pre>
 </div>
@@ -110,7 +110,7 @@ Training set accuracy 0.87475
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fullstream.data</span> <span class="kn">import</span> <span class="n">get_three_blobs</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">neos.data</span> <span class="kn">import</span> <span class="n">get_three_blobs</span>
 
 <span class="n">sig</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_three_blobs</span><span class="p">(</span><span class="n">num_points</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
 <span class="n">sighist</span><span class="p">,</span> <span class="n">bkghist</span> <span class="o">=</span> <span class="n">hists_from_nn</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">predict</span><span class="p">,</span> <span class="n">nn_params</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">bkg</span><span class="p">)</span>
@@ -187,7 +187,7 @@ Training set accuracy 0.87475
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hists_from_nn_bkg_var" class="doc_header"><code>hists_from_nn_bkg_var</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/hists.py#L29" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn_bkg_var</code>(<strong><code>nn</code></strong>, <strong><code>params</code></strong>, <strong><code>sig</code></strong>, <strong><code>bkg</code></strong>, <strong><code>scale</code></strong>=<em><code>True</code></em>, <strong><code>use_jax</code></strong>=<em><code>True</code></em>, <strong><code>scale_factors</code></strong>=<em><code>[0.02, 0.1]</code></em>)</p>
+<h4 id="hists_from_nn_bkg_var" class="doc_header"><code>hists_from_nn_bkg_var</code><a href="https://github.com/phinate/neos/tree/master/neos/hists.py#L29" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn_bkg_var</code>(<strong><code>nn</code></strong>, <strong><code>params</code></strong>, <strong><code>sig</code></strong>, <strong><code>bkg</code></strong>, <strong><code>scale</code></strong>=<em><code>True</code></em>, <strong><code>use_jax</code></strong>=<em><code>True</code></em>, <strong><code>scale_factors</code></strong>=<em><code>[0.02, 0.1]</code></em>)</p>
 </blockquote>
 <p>Create nn-based binned summary statistics from signal and background events, with the background histograms containing multiple variations.
 The std of these variations is then the uncertainty.</p>
@@ -208,7 +208,7 @@ The std of these variations is then the uncertainty.</p>
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">fullstream.nn</span> <span class="kn">import</span> <span class="n">three_blob_classifier</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">neos.nn</span> <span class="kn">import</span> <span class="n">three_blob_classifier</span>
 
 <span class="n">x</span> <span class="o">=</span> <span class="n">three_blob_classifier</span><span class="p">()</span>
 <span class="n">_</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">num_epochs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -227,7 +227,7 @@ The std of these variations is then the uncertainty.</p>
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>
 Starting training...
-Epoch 0 in 3.36 sec
+Epoch 0 in 5.07 sec
 Training set accuracy 0.8476
 </pre>
 </div>
@@ -331,7 +331,7 @@ Training set accuracy 0.8476
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="simple_nn_logpdf" class="doc_header"><code>simple_nn_logpdf</code><a href="https://github.com/phinate/fullstream/tree/master/fullstream/hists.py#L62" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>simple_nn_logpdf</code>(<strong><code>nn_pars</code></strong>, <strong><code>nn</code></strong>, <strong><code>pars</code></strong>, <strong><code>data</code></strong>, <strong><code>sig_data</code></strong>, <strong><code>bkg_data</code></strong>, <strong><code>bkg_uncerts</code></strong>)</p>
+<h4 id="simple_nn_logpdf" class="doc_header"><code>simple_nn_logpdf</code><a href="https://github.com/phinate/neos/tree/master/neos/hists.py#L62" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>simple_nn_logpdf</code>(<strong><code>nn_pars</code></strong>, <strong><code>nn</code></strong>, <strong><code>pars</code></strong>, <strong><code>data</code></strong>, <strong><code>sig_data</code></strong>, <strong><code>bkg_data</code></strong>, <strong><code>bkg_uncerts</code></strong>)</p>
 </blockquote>
 <p>Return pyhf.Model.logpdf for a simple two-bin model, containing a signal and background histogram created using hists_from_nn. Mostly for demo purposes.</p>
 

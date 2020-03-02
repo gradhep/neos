@@ -1,10 +1,10 @@
-import fullstream.transforms as transforms
+import neos.transforms as transforms
 import jax.numpy as jnp
-import fullstream.models as models
+import neos.models as models
 import jax
 import scipy.optimize
-import fullstream.fit as fit
-from fullstream.cls import cls_maker
+import neos.fit as fit
+from neos.cls import cls_maker
 import pyhf
 import funnyscipy
 

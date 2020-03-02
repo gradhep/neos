@@ -28,8 +28,8 @@ modules = ["nn.py",
            "fit.py",
            "cls.py"]
 
-doc_url = "https://phinate.github.io/fullstream/"
+doc_url = "https://phinate.github.io/neos/"
 
-git_url = "https://github.com/phinate/fullstream/tree/master/"
+git_url = "https://github.com/phinate/neos/tree/master/"
 
 def custom_doc_links(name): return None

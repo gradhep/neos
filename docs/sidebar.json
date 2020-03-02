@@ -1,12 +1,12 @@
 {
-  "fullstream": {
+  "neos": {
     "Overview": "/",
     "fullstream.nn": "/nn",
-    "fullstream.hists": "/hists",
-    "fullstream.data": "/data",
-    "fullstream.models": "/models",
-    "fullstream.transforms": "/transforms",
-    "fullstream.fit": "/fit",
-    "fullstream.cls": "/cls"
+    "neos.hists": "/hists",
+    "neos.data": "/data",
+    "neos.models": "/models",
+    "neos.transforms": "/transforms",
+    "neos.fit": "/fit",
+    "neos.cls": "/cls"
   }
 }

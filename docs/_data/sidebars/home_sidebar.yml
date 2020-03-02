@@ -13,24 +13,24 @@ entries:
       title: fullstream.nn
       url: /nn
     - output: web,pdf
-      title: fullstream.hists
+      title: neos.hists
       url: /hists
     - output: web,pdf
-      title: fullstream.data
+      title: neos.data
       url: /data
     - output: web,pdf
-      title: fullstream.models
+      title: neos.models
       url: /models
     - output: web,pdf
-      title: fullstream.transforms
+      title: neos.transforms
       url: /transforms
     - output: web,pdf
-      title: fullstream.fit
+      title: neos.fit
       url: /fit
     - output: web,pdf
-      title: fullstream.cls
+      title: neos.cls
       url: /cls
     output: web
-    title: fullstream
+    title: neos
   output: web
   title: Sidebar
