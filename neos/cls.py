@@ -15,6 +15,7 @@ pyhf.set_backend(pyhf.tensor.jax_backend())
 
 from .fit import get_solvers
 from .transforms import *
+from .models import *
 
 # Cell
 def cls_maker(nn_model_maker, solver_kwargs):
@@ -22,9 +23,9 @@ def cls_maker(nn_model_maker, solver_kwargs):
         g_fitter, c_fitter = get_solvers(nn_model_maker, **solver_kwargs)
 
         m, bonlypars = nn_model_maker(nn_params)
-        exp_data = m.expected_data(bonlypars)
+        exp_data = expected_data(m,bonlypars)
         print(f'exp_data: {exp_data}')
-        bounds = m.config.suggested_bounds()
+        bounds = m.config.suggested_bounds
 
         # map these
         initval = jax.numpy.asarray([test_mu, 1.0])
@@ -49,7 +50,7 @@ def cls_maker(nn_model_maker, solver_kwargs):
 
         # compute test statistic (lambda(µ))
         profile_likelihood = -2 * (
-            m.logpdf(numerator, exp_data)[0] - m.logpdf(denominator, exp_data)[0]
+            logpdf(m,numerator, exp_data)[0] - logpdf(m,denominator, exp_data)[0]
         )
 
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ

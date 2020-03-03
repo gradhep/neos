@@ -8,6 +8,7 @@ from fax.implicit import twophase
 import jax.experimental.optimizers as optimizers
 
 from .transforms import to_bounded_vec, to_inf_vec, to_bounded, to_inf
+from .models import *
 
 # Cell
 def get_solvers(
@@ -21,27 +22,26 @@ def get_solvers(
 
     adam_init, adam_update, adam_get_params  = optimizers.adam(1e-6)
 
-
     def make_model(hyper_pars):
         constrained_mu, nn_pars = hyper_pars[0], hyper_pars[1]
         m, bonlypars = model_constructor(nn_pars)
 
 
-        bounds = m.config.suggested_bounds()
+        bounds = m.config.suggested_bounds
         constrained_mu = to_inf(constrained_mu,bounds[0]) if pdf_transform else constrained_mu
 
-        exp_bonly_data = m.expected_data(bonlypars, include_auxdata=True)
+        exp_bonly_data = expected_data(m,bonlypars, include_auxdata=True)
 
         def expected_logpdf(pars):  # maps pars to bounded space if pdf_transform = True
 
             return (
-                m.logpdf(
-                    to_bounded_vec(pars, bounds), exp_bonly_data
+                logpdf(
+                    m,to_bounded_vec(pars, bounds), exp_bonly_data
                 )
                 if pdf_transform
                 else
-                m.logpdf(
-                    pars, exp_bonly_data
+                logpdf(
+                    m,pars, exp_bonly_data
                 )
             )
 
