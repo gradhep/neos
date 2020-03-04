@@ -14,4 +14,4 @@ Leverages the shoulders of giants (pyhf, jax). Very much a WIP right now :)
 
 ## How to use
 
-coming soon!
+coming soon! (:

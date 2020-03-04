@@ -10,17 +10,11 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: fullstream.nn
-      url: /nn
-    - output: web,pdf
-      title: neos.hists
-      url: /hists
-    - output: web,pdf
-      title: neos.data
-      url: /data
-    - output: web,pdf
       title: neos.models
       url: /models
+    - output: web,pdf
+      title: Title
+      url: /jax_issue_2346
     - output: web,pdf
       title: neos.transforms
       url: /transforms

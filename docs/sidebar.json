@@ -1,10 +1,8 @@
 {
   "neos": {
     "Overview": "/",
-    "fullstream.nn": "/nn",
-    "neos.hists": "/hists",
-    "neos.data": "/data",
     "neos.models": "/models",
+    "Title": "/jax_issue_2346",
     "neos.transforms": "/transforms",
     "neos.fit": "/fit",
     "neos.cls": "/cls"
