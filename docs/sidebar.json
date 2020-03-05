@@ -2,7 +2,7 @@
   "neos": {
     "Overview": "/",
     "neos.models": "/models",
-    "Title": "/jax_issue_2346",
+    "Title": "/demo_training",
     "neos.transforms": "/transforms",
     "neos.fit": "/fit",
     "neos.cls": "/cls"

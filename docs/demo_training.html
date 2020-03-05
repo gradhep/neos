@@ -28,8 +28,8 @@ summary: "summary"
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
-<span class="kn">from</span> <span class="nn">neos.cls</span> <span class="kn">import</span> <span class="n">cls_maker</span>
-<span class="kn">from</span> <span class="nn">neos.makers</span> <span class="kn">import</span> <span class="n">hists_from_nn_three_blobs</span><span class="p">,</span> <span class="n">nn_hepdata_like</span>
+<span class="kn">import</span> <span class="nn">neos.makers</span> <span class="k">as</span> <span class="nn">makers</span>
+<span class="kn">import</span> <span class="nn">neos.cls</span> <span class="k">as</span> <span class="nn">cls</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">jax.experimental.stax</span> <span class="k">as</span> <span class="nn">stax</span>
 <span class="kn">import</span> <span class="nn">jax.experimental.optimizers</span> <span class="k">as</span> <span class="nn">optimizers</span>
@@ -41,6 +41,12 @@ summary: "summary"
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Initialise-network-using-jax.experimental.stax">Initialise network using <code>jax.experimental.stax</code><a class="anchor-link" href="#Initialise-network-using-jax.experimental.stax">&#182;</a></h3>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -62,15 +68,46 @@ summary: "summary"
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Initialse-tools-from-neos:">Initialse tools from <code>neos</code>:<a class="anchor-link" href="#Initialse-tools-from-neos:">&#182;</a></h3><p>The way we initialise in <code>neos</code> is to define functions that make a statistical model from histograms, which in turn are themselves made from a predictive model, such as a neural network. Here's some detail on the unctions used below:</p>
+<ul>
+<li><code>hists_from_nn_three_blobs(predict)</code> uses the nn decision function <code>predict</code> defined in the cell above to form histograms from signal and background data, all drawn from multivariate normal distributions with different means. Two background distributions are sampled from, which is meant to mimic the situation in particle physics where one has a 'nominal' prediction for a nuisance parameter and then an alternate value (e.g. from varying up/down by one standard deviation), which then modifies the background pdf. Here, we take that effect to be a shift of the mean of the distribution. The value for the background histogram is then the mean of the resulting counts of the two modes, and the uncertainty can be quantified through the count standard deviation.</li>
+<li><code>nn_hepdata_like(hmaker)</code> uses <code>hmaker</code> to construct histograms, then feeds them into the <code>neos.models.hepdata_like</code> function that constructs a pyhf-like model. This can then be used to call things like <a href="/neos/models#logpdf"><code>logpdf</code></a> and <a href="/neos/models#expected_data"><code>expected_data</code></a> downstream.</li>
+<li><a href="/neos/cls#cls_maker"><code>cls_maker</code></a> takes a model-making function as it's primary argument, which is fed into functions from <code>neos.fit</code> that minimise the <a href="/neos/models#logpdf"><code>logpdf</code></a> of the model in both a constrained (fixed parameter of interest) and a global way. Moreover, these fits are wrapped in a function that allows us to calculate gradients through the fits using <em>fixed-point differentiation</em>. This allows for the calculation of both the profile likelihood and its gradient, and then the same for $\mathsf{cl_s}$ :)</li>
+</ul>
+<p>All three of these methods return functions. in particular, <a href="/neos/cls#cls_maker"><code>cls_maker</code></a> returns a function that differentiably calculates $\mathsf{cl_s}$ values, which is our desired objective to minimise.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hmaker</span> <span class="o">=</span> <span class="n">hists_from_nn_three_blobs</span><span class="p">(</span><span class="n">predict</span><span class="p">)</span>
-<span class="n">nnm</span> <span class="o">=</span> <span class="n">nn_hepdata_like</span><span class="p">(</span><span class="n">hmaker</span><span class="p">)</span>
-<span class="n">loss</span> <span class="o">=</span> <span class="n">cls_maker</span><span class="p">(</span><span class="n">nnm</span><span class="p">,</span> <span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-<span class="n">gradd</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hmaker</span> <span class="o">=</span> <span class="n">makers</span><span class="o">.</span><span class="n">hists_from_nn_three_blobs</span><span class="p">(</span><span class="n">predict</span><span class="p">)</span>
+<span class="n">nnm</span> <span class="o">=</span> <span class="n">makers</span><span class="o">.</span><span class="n">nn_hepdata_like</span><span class="p">(</span><span class="n">hmaker</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nnm</span><span class="p">,</span> <span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Randomly-initialise-nn-weights-and-check-that-we-can-get-the-gradient-of-the-loss-wrt-nn-params">Randomly initialise nn weights and check that we can get the gradient of the loss wrt nn params<a class="anchor-link" href="#Randomly-initialise-nn-weights-and-check-that-we-can-get-the-gradient-of-the-loss-wrt-nn-params">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">gradd</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">jit</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">loss</span><span class="p">))</span>
 <span class="n">_</span><span class="p">,</span> <span class="n">network</span> <span class="o">=</span> <span class="n">init_random_params</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
 <span class="n">gradd</span><span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
 </pre></div>
@@ -95,38 +132,38 @@ summary: "summary"
 
 
 <div class="output_text output_subarea output_execute_result">
-<pre>(DeviceArray(0.0659241, dtype=float64),
- [(DeviceArray([[-0.00359648,  0.00536213, -0.0018447 , ..., -0.00457026,
-                  0.00062036, -0.00826007],
-                [-0.00232882,  0.00575967, -0.00357669, ..., -0.0054731 ,
-                  0.00086724, -0.0069681 ]], dtype=float32),
-   DeviceArray([ 0.00263221,  0.00092044,  0.0021967 , ...,  0.00463743,
-                -0.00071614, -0.0028333 ], dtype=float32)),
+<pre>(DeviceArray(0.06589378, dtype=float64),
+ [(DeviceArray([[-0.00340209,  0.00524848, -0.00183196, ..., -0.00436279,
+                  0.00047863, -0.00840352],
+                [-0.00225339,  0.00555055, -0.0037176 , ..., -0.0056875 ,
+                  0.00079035, -0.00695018]], dtype=float32),
+   DeviceArray([ 0.0025139 ,  0.00083593,  0.00219164, ...,  0.00448581,
+                -0.00062551, -0.00289932], dtype=float32)),
   (),
-  (DeviceArray([[-5.18000479e-06, -1.42756195e-04, -1.34484828e-04, ...,
-                 -5.86467388e-04,  3.59904448e-06, -1.89752624e-04],
-                [ 8.21839858e-05, -2.25089229e-06,  3.04650341e-04, ...,
-                  1.55986694e-04, -6.47796060e-06,  8.03276416e-05],
-                [ 5.50607126e-07, -9.69289904e-05, -3.66234344e-05, ...,
-                 -3.93298629e-04,  1.56825536e-06, -1.24880477e-04],
+  (DeviceArray([[-4.59392322e-06, -1.44112695e-04, -1.33879235e-04, ...,
+                 -5.90896409e-04,  3.63506251e-06, -1.92979292e-04],
+                [ 8.59041174e-05, -2.32842081e-06,  3.03155073e-04, ...,
+                  1.63249540e-04, -6.42077475e-06,  6.73797185e-05],
+                [ 5.38472534e-07, -1.00055178e-04, -3.85516942e-05, ...,
+                 -4.05492872e-04,  1.65913957e-06, -1.30297500e-04],
                 ...,
-                [-9.04717672e-06, -2.23613635e-04, -2.24434640e-04, ...,
-                 -9.16010584e-04,  5.85084081e-06, -2.99545500e-04],
-                [ 2.03973727e-07, -1.66548853e-04, -9.05162451e-05, ...,
-                 -6.81499252e-04,  3.16822457e-06, -2.10437502e-04],
-                [ 1.02021615e-04, -1.59735839e-06,  3.12346179e-04, ...,
-                  2.38542634e-04, -6.64411891e-06,  6.25936955e-05]],            dtype=float32),
-   DeviceArray([ 9.7803073e-04, -1.9716257e-03,  2.1175754e-03, ...,
-                -5.9587322e-03, -3.3922515e-05, -1.3905740e-03],            dtype=float32)),
+                [-7.88618672e-06, -2.25290074e-04, -2.22142800e-04, ...,
+                 -9.21601662e-04,  5.87987779e-06, -3.04082176e-04],
+                [ 4.63933588e-07, -1.70240222e-04, -9.28720037e-05, ...,
+                 -6.95536786e-04,  3.31202887e-06, -2.17996843e-04],
+                [ 1.06714884e-04, -2.29571720e-06,  3.18777224e-04, ...,
+                  2.44337542e-04, -6.74173953e-06,  5.18434936e-05]],            dtype=float32),
+   DeviceArray([ 1.0446050e-03, -1.9428425e-03,  2.1057830e-03, ...,
+                -5.6148679e-03, -3.2292810e-05, -1.6046281e-03],            dtype=float32)),
   (),
-  (DeviceArray([[-0.00084568,  0.00084568],
-                [ 0.0043954 , -0.0043954 ],
-                [-0.00521974,  0.00521974],
+  (DeviceArray([[-0.00089687,  0.00089687],
+                [ 0.00447635, -0.00447635],
+                [-0.00519645,  0.00519645],
                 ...,
-                [ 0.00389181, -0.00389181],
-                [-0.00297543,  0.00297543],
-                [ 0.00065709, -0.00065709]], dtype=float32),
-   DeviceArray([ 0.00022195, -0.00022195], dtype=float32)),
+                [ 0.00382949, -0.00382949],
+                [-0.00304956,  0.00304956],
+                [ 0.00071457, -0.00071457]], dtype=float32),
+   DeviceArray([ 0.00022595, -0.00022595], dtype=float32)),
   ()])</pre>
 </div>
 
@@ -135,6 +172,12 @@ summary: "summary"
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Define-training-loop!">Define training loop!<a class="anchor-link" href="#Define-training-loop!">&#182;</a></h3>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -177,6 +220,12 @@ summary: "summary"
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Plotting-helper-function-for-awesome-animations-:)">Plotting helper function for awesome animations :)<a class="anchor-link" href="#Plotting-helper-function-for-awesome-animations-:)">&#182;</a></h3>
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
@@ -233,6 +282,12 @@ summary: "summary"
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Let's-run-it!!">Let's run it!!<a class="anchor-link" href="#Let's-run-it!!">&#182;</a></h3>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -261,19 +316,23 @@ summary: "summary"
 <span class="n">fig</span><span class="p">,</span> <span class="n">axarr</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 <span class="n">camera</span> <span class="o">=</span> <span class="n">Camera</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
-<span class="n">maxN</span> <span class="o">=</span> <span class="mi">60</span>
 
+<span class="n">maxN</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1"># make me bigger for better results!</span>
 
+<span class="n">animate</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1"># animations fail tests</span>
 
+<span class="c1"># Training</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">epoch_time</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_network</span><span class="p">(</span><span class="n">maxN</span><span class="p">)):</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epoch </span><span class="si">{i}</span><span class="s2">:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;CLs = </span><span class="si">{metrics[&quot;loss&quot;][-1]}</span><span class="s1">, took </span><span class="si">{epoch_time}</span><span class="s1">s&#39;</span><span class="p">)</span>
-    <span class="n">plot</span><span class="p">(</span><span class="n">axarr</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">nnm</span><span class="o">.</span><span class="n">hm</span><span class="p">,</span> <span class="n">maxN</span><span class="o">=</span><span class="n">maxN</span><span class="p">)</span>
-    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
-    <span class="n">camera</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animation.gif&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
-        <span class="n">HTML</span><span class="p">(</span><span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
-<span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animation.gif&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+        <span class="n">plot</span><span class="p">(</span><span class="n">axarr</span><span class="p">,</span> <span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">nnm</span><span class="o">.</span><span class="n">hm</span><span class="p">,</span> <span class="n">maxN</span><span class="o">=</span><span class="n">maxN</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">camera</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animation.gif&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+            <span class="c1">#HTML(camera.animate().to_html5_video())</span>
+<span class="k">if</span> <span class="n">animate</span><span class="p">:</span>
+    <span class="n">camera</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;animation.gif&quot;</span><span class="p">,</span> <span class="n">writer</span><span class="o">=</span><span class="s2">&quot;imagemagick&quot;</span><span class="p">,</span> <span class="n">fps</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 </pre></div>
 
     </div>

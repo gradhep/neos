@@ -14,7 +14,7 @@ entries:
       url: /models
     - output: web,pdf
       title: Title
-      url: /jax_issue_2346
+      url: /demo_training
     - output: web,pdf
       title: neos.transforms
       url: /transforms

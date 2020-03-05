@@ -24,7 +24,7 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>{% include image.html alt="logo" max-width="200" file="/neos/logo.png" %}</p>
+<p>{% include image.html alt="logo" align="middle" max-width="200" file="/neos/neos_logo.png" %}</p>
 
 </div>
 </div>
@@ -38,33 +38,216 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Leverages the shoulders of giants (pyhf, jax). Very much a WIP right now :)</p>
+<h2 id="Install">Install<a class="anchor-link" href="#Install">&#182;</a></h2><p><code>pip install neos</code></p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Install">Install<a class="anchor-link" href="#Install">&#182;</a></h2>
+<h2 id="How-to-use-(and-reproduce-the-results-from-the-cool-animation)">How to use (and reproduce the results from the cool animation)<a class="anchor-link" href="#How-to-use-(and-reproduce-the-results-from-the-cool-animation)">&#182;</a></h2>
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">neos.makers</span> <span class="k">as</span> <span class="nn">makers</span>
+<span class="kn">import</span> <span class="nn">neos.cls</span> <span class="k">as</span> <span class="nn">cls</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">jax.experimental.stax</span> <span class="k">as</span> <span class="nn">stax</span>
+<span class="kn">import</span> <span class="nn">jax.experimental.optimizers</span> <span class="k">as</span> <span class="nn">optimizers</span>
+<span class="kn">import</span> <span class="nn">jax.random</span>
+<span class="kn">import</span> <span class="nn">time</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><code>pip install neos</code></p>
+<h3 id="Initialise-network-using-jax.experimental.stax">Initialise network using <code>jax.experimental.stax</code><a class="anchor-link" href="#Initialise-network-using-jax.experimental.stax">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">init_random_params</span><span class="p">,</span> <span class="n">predict</span> <span class="o">=</span> <span class="n">stax</span><span class="o">.</span><span class="n">serial</span><span class="p">(</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1024</span><span class="p">),</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Softmax</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Initialse-tools-from-neos:">Initialse tools from <code>neos</code>:<a class="anchor-link" href="#Initialse-tools-from-neos:">&#182;</a></h3><p>The way we initialise in <code>neos</code> is to define functions that make a statistical model from histograms, which in turn are themselves made from a predictive model, such as a neural network. Here's some detail on the unctions used below:</p>
+<ul>
+<li><code>hists_from_nn_three_blobs(predict)</code> uses the nn decision function <code>predict</code> defined in the cell above to form histograms from signal and background data, all drawn from multivariate normal distributions with different means. Two background distributions are sampled from, which is meant to mimic the situation in particle physics where one has a 'nominal' prediction for a nuisance parameter and then an alternate value (e.g. from varying up/down by one standard deviation), which then modifies the background pdf. Here, we take that effect to be a shift of the mean of the distribution. The value for the background histogram is then the mean of the resulting counts of the two modes, and the uncertainty can be quantified through the count standard deviation.</li>
+<li><code>nn_hepdata_like(hmaker)</code> uses <code>hmaker</code> to construct histograms, then feeds them into the <code>neos.models.hepdata_like</code> function that constructs a pyhf-like model. This can then be used to call things like <a href="/neos/models#logpdf"><code>logpdf</code></a> and <a href="/neos/models#expected_data"><code>expected_data</code></a> downstream.</li>
+<li><a href="/neos/cls#cls_maker"><code>cls_maker</code></a> takes a model-making function as it's primary argument, which is fed into functions from <code>neos.fit</code> that minimise the <a href="/neos/models#logpdf"><code>logpdf</code></a> of the model in both a constrained (fixed parameter of interest) and a global way. Moreover, these fits are wrapped in a function that allows us to calculate gradients through the fits using <em>fixed-point differentiation</em>. This allows for the calculation of both the profile likelihood and its gradient, and then the same for $\mathsf{cl_s}$ :)</li>
+</ul>
+<p>All three of these methods return functions. in particular, <a href="/neos/cls#cls_maker"><code>cls_maker</code></a> returns a function that differentiably calculates $\mathsf{cl_s}$ values, which is our desired objective to minimise.</p>
 
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">hmaker</span> <span class="o">=</span> <span class="n">makers</span><span class="o">.</span><span class="n">hists_from_nn_three_blobs</span><span class="p">(</span><span class="n">predict</span><span class="p">)</span>
+<span class="n">nnm</span> <span class="o">=</span> <span class="n">makers</span><span class="o">.</span><span class="n">nn_hepdata_like</span><span class="p">(</span><span class="n">hmaker</span><span class="p">)</span>
+<span class="n">loss</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nnm</span><span class="p">,</span> <span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">_</span><span class="p">,</span> <span class="n">network</span> <span class="o">=</span> <span class="n">init_random_params</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>/home/phinate/envs/neos/lib/python3.7/site-packages/jax-0.1.59-py3.7.egg/jax/lib/xla_bridge.py:122: UserWarning: No GPU/TPU found, falling back to CPU.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="How-to-use">How to use<a class="anchor-link" href="#How-to-use">&#182;</a></h2>
+<h3 id="Define-training-loop!">Define training loop!<a class="anchor-link" href="#Define-training-loop!">&#182;</a></h3>
 </div>
 </div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">opt_init</span><span class="p">,</span> <span class="n">opt_update</span><span class="p">,</span> <span class="n">opt_params</span> <span class="o">=</span> <span class="n">optimizers</span><span class="o">.</span><span class="n">adam</span><span class="p">(</span><span class="mf">1e-3</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">update_and_value</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
+    <span class="n">net</span> <span class="o">=</span> <span class="n">opt_params</span><span class="p">(</span><span class="n">opt_state</span><span class="p">)</span>
+    <span class="n">value</span><span class="p">,</span> <span class="n">grad</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">loss</span><span class="p">)(</span><span class="n">net</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">opt_update</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">grad</span><span class="p">,</span> <span class="n">opt_state</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="n">net</span>
+
+<span class="k">def</span> <span class="nf">train_network</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+    <span class="n">cls_vals</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">network</span> <span class="o">=</span> <span class="n">init_random_params</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">opt_init</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+    <span class="n">losses</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">state</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">network</span> <span class="o">=</span> <span class="n">update_and_value</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">state</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">epoch_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="n">losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">metrics</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">losses</span><span class="p">}</span>
+        <span class="k">yield</span> <span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">epoch_time</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>coming soon! (:</p>
+<h3 id="Let's-run-it!!">Let's run it!!<a class="anchor-link" href="#Let's-run-it!!">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">maxN</span> <span class="o">=</span> <span class="mi">20</span> <span class="c1"># make me bigger for better results!</span>
+
+<span class="c1"># Training</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">epoch_time</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_network</span><span class="p">(</span><span class="n">maxN</span><span class="p">)):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epoch </span><span class="si">{i}</span><span class="s2">:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;CLs = </span><span class="si">{metrics[&quot;loss&quot;][-1]}</span><span class="s1">, took </span><span class="si">{epoch_time}</span><span class="s1">s&#39;</span><span class="p">)</span> 
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>epoch 0: CLs = 0.06680655092981347, took 5.355436325073242s
+epoch 1: CLs = 0.4853891149072429, took 1.5733795166015625s
+epoch 2: CLs = 0.3379355596004474, took 1.5171947479248047s
+epoch 3: CLs = 0.1821927415636535, took 1.5081253051757812s
+epoch 4: CLs = 0.09119136931683047, took 1.5193650722503662s
+epoch 5: CLs = 0.04530559823843272, took 1.5008423328399658s
+epoch 6: CLs = 0.022572851867672883, took 1.499192476272583s
+epoch 7: CLs = 0.013835564056077887, took 1.5843737125396729s
+epoch 8: CLs = 0.01322058601444187, took 1.520324468612671s
+epoch 9: CLs = 0.013407422454837725, took 1.5050244331359863s
+epoch 10: CLs = 0.011836452218993765, took 1.509469985961914s
+epoch 11: CLs = 0.00948507486266359, took 1.5089364051818848s
+epoch 12: CLs = 0.007350505632595539, took 1.5106918811798096s
+epoch 13: CLs = 0.005755974539907838, took 1.5267891883850098s
+epoch 14: CLs = 0.0046464301411786035, took 1.5851080417633057s
+epoch 15: CLs = 0.0038756402968267434, took 1.8452086448669434s
+epoch 16: CLs = 0.003323640670405803, took 1.9116990566253662s
+epoch 17: CLs = 0.0029133909840759475, took 1.7648999691009521s
+epoch 18: CLs = 0.002596946123608612, took 1.6314191818237305s
+epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>And there we go!! We discovered a new signal (depending on your arbitrary thershold) ;)</p>
+<p>If you want to reproduce the full animation, a version of this code with plotting helpers can be found in <code>demo_training.ipynb</code>! :D</p>
 
 </div>
 </div>
