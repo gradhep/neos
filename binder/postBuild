@@ -1,1 +1,2 @@
+python -m pip install git+https://github.com/gehring/fax.git
 python -m pip install --upgrade .
