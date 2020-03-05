@@ -1,6 +1,13 @@
+# Title
+> summary
+
+
 # neos
+
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
 > nice end-to-end optimized statistics ;)
 
+Leverages the shoulders of giants (pyhf, jax). Very much a WIP right now : )
 
 <img src="neos_logo.png" alt="logo" width="200" align="middle">
 
