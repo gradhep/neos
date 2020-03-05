@@ -123,6 +123,6 @@ for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
     epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
 
 
-And there we go!! We discovered a new signal (depending on your arbitrary thershold) ;)
+And there we go!!
 
 If you want to reproduce the full animation, a version of this code with plotting helpers can be found in `demo_training.ipynb`! :D
