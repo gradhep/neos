@@ -10,9 +10,12 @@
 ![](training.gif)
 
 ## Install
+
 Just run
 
-`pip install neos`
+```
+python -m pip install neos
+```
 
 ## How to use (and reproduce the results from the cool animation)
 
