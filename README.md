@@ -2,6 +2,8 @@
 > nice end-to-end optimized statistics ;)
 
 
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
+
 <img src="neos_logo.png" alt="logo" width="200" align="middle">
 
 ![](training.gif)
