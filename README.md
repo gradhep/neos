@@ -3,6 +3,7 @@
 
 
 [![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
 
 <img src="neos_logo.png" alt="logo" width="200" align="middle">
 
@@ -81,7 +82,7 @@ def train_network(N):
     _, network = init_random_params(jax.random.PRNGKey(1), (-1, 2))
     state = opt_init(network)
     losses = []
-    
+
     for i in range(N):
         start_time = time.time()
         state, value, network = update_and_value(i,state,1.0)
@@ -98,7 +99,7 @@ maxN = 20 # make me bigger for better results!
 
 # Training
 for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
-    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s') 
+    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s')
 ```
 
     epoch 0: CLs = 0.06680655092981347, took 5.355436325073242s
