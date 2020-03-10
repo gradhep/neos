@@ -10,11 +10,7 @@
 ![](training.gif)
 
 ## Install
-To use `neos` right now, you have to seperately install the `fax` library for fixed-point differentiation:
-
-`pip install git+https://github.com/gehring/fax.git`
-
-Then just run
+Just run
 
 `pip install neos`
 
