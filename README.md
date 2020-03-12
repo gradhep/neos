@@ -123,3 +123,7 @@ for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
 And there we go!!
 
 If you want to reproduce the full animation, a version of this code with plotting helpers can be found in `demo_training.ipynb`! :D
+
+## Thanks
+
+A big thanks to the teams behind [`jax`](https://github.com/google/jax/), [`fax`](https://github.com/gehring/fax), and [`pyhf`](https://github.com/scikit-hep/pyhf) for their software and support.
