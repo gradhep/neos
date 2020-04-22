@@ -6,6 +6,7 @@ keywords: fastai
 sidebar: home_sidebar
 
 summary: "nice end-to-end optimized statistics ;)"
+description: "nice end-to-end optimized statistics ;)"
 ---
 <!--
 
@@ -18,11 +19,14 @@ summary: "nice end-to-end optimized statistics ;)"
 -->
 
 <div class="container" id="notebook-container">
-    {% raw %}
         
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p><a href="https://zenodo.org/badge/latestdoi/235776682"><img src="https://zenodo.org/badge/235776682.svg" alt="DOI"></a></p>
@@ -46,7 +50,7 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="Install">Install<a class="anchor-link" href="#Install">&#182;</a></h2><p>To use <code>neos</code> right now, you have to seperately install the <code>fax</code> library for fixed-point differentiation:</p>
+<h2 id="Install">Install<a class="anchor-link" href="#Install"> </a></h2><p>To use <code>neos</code> right now, you have to seperately install the <code>fax</code> library for fixed-point differentiation:</p>
 <p><code>pip install git+https://github.com/gehring/fax.git</code></p>
 <p>Then just run</p>
 <p><code>pip install neos</code></p>
@@ -56,10 +60,12 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="How-to-use-(and-reproduce-the-results-from-the-cool-animation)">How to use (and reproduce the results from the cool animation)<a class="anchor-link" href="#How-to-use-(and-reproduce-the-results-from-the-cool-animation)">&#182;</a></h2>
+<h2 id="How-to-use-(and-reproduce-the-results-from-the-cool-animation)">How to use (and reproduce the results from the cool animation)<a class="anchor-link" href="#How-to-use-(and-reproduce-the-results-from-the-cool-animation)"> </a></h2>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -80,12 +86,16 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Initialise-network-using-jax.experimental.stax">Initialise network using <code>jax.experimental.stax</code><a class="anchor-link" href="#Initialise-network-using-jax.experimental.stax">&#182;</a></h3>
+<h3 id="Initialise-network-using-jax.experimental.stax">Initialise network using <code>jax.experimental.stax</code><a class="anchor-link" href="#Initialise-network-using-jax.experimental.stax"> </a></h3>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -106,9 +116,11 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Initialse-tools-from-neos:">Initialse tools from <code>neos</code>:<a class="anchor-link" href="#Initialse-tools-from-neos:">&#182;</a></h3><p>The way we initialise in <code>neos</code> is to define functions that make a statistical model from histograms, which in turn are themselves made from a predictive model, such as a neural network. Here's some detail on the unctions used below:</p>
+<h3 id="Initialse-tools-from-neos:">Initialse tools from <code>neos</code>:<a class="anchor-link" href="#Initialse-tools-from-neos:"> </a></h3><p>The way we initialise in <code>neos</code> is to define functions that make a statistical model from histograms, which in turn are themselves made from a predictive model, such as a neural network. Here's some detail on the unctions used below:</p>
 <ul>
 <li><code>hists_from_nn_three_blobs(predict)</code> uses the nn decision function <code>predict</code> defined in the cell above to form histograms from signal and background data, all drawn from multivariate normal distributions with different means. Two background distributions are sampled from, which is meant to mimic the situation in particle physics where one has a 'nominal' prediction for a nuisance parameter and then an alternate value (e.g. from varying up/down by one standard deviation), which then modifies the background pdf. Here, we take that effect to be a shift of the mean of the distribution. The value for the background histogram is then the mean of the resulting counts of the two modes, and the uncertainty can be quantified through the count standard deviation.</li>
 <li><code>nn_hepdata_like(hmaker)</code> uses <code>hmaker</code> to construct histograms, then feeds them into the <code>neos.models.hepdata_like</code> function that constructs a pyhf-like model. This can then be used to call things like <a href="/neos/models#logpdf"><code>logpdf</code></a> and <a href="/neos/models#expected_data"><code>expected_data</code></a> downstream.</li>
@@ -119,6 +131,8 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -134,6 +148,10 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 
 </div>
+    {% endraw %}
+
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -161,12 +179,16 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Define-training-loop!">Define training loop!<a class="anchor-link" href="#Define-training-loop!">&#182;</a></h3>
+<h3 id="Define-training-loop!">Define training loop!<a class="anchor-link" href="#Define-training-loop!"> </a></h3>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -199,12 +221,16 @@ summary: "nice end-to-end optimized statistics ;)"
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="Let's-run-it!!">Let's run it!!<a class="anchor-link" href="#Let's-run-it!!">&#182;</a></h3>
+<h3 id="Let's-run-it!!">Let's run it!!<a class="anchor-link" href="#Let's-run-it!!"> </a></h3>
 </div>
 </div>
 </div>
+    {% raw %}
+    
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 
@@ -214,7 +240,7 @@ summary: "nice end-to-end optimized statistics ;)"
 
 <span class="c1"># Training</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">network</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">epoch_time</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_network</span><span class="p">(</span><span class="n">maxN</span><span class="p">)):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epoch </span><span class="si">{i}</span><span class="s2">:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;CLs = </span><span class="si">{metrics[&quot;loss&quot;][-1]}</span><span class="s1">, took </span><span class="si">{epoch_time}</span><span class="s1">s&#39;</span><span class="p">)</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epoch </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">:&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;CLs = </span><span class="si">{</span><span class="n">metrics</span><span class="p">[</span><span class="s2">&quot;loss&quot;</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s1">, took </span><span class="si">{</span><span class="n">epoch_time</span><span class="si">}</span><span class="s1">s&#39;</span><span class="p">)</span> 
 </pre></div>
 
     </div>
@@ -255,6 +281,8 @@ epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
 </div>
 
 </div>
+    {% endraw %}
+
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>And there we go!! We discovered a new signal (depending on your arbitrary thershold) ;)</p>
@@ -263,7 +291,6 @@ epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
 </div>
 </div>
 </div>
-    {% endraw %}
 </div>
  
 

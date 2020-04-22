@@ -3,19 +3,19 @@
 
 
 [![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
 
-<img src="neos_logo.png" alt="logo" width="200" align="middle">
+<img src="nbs/neos_logo.png" alt="logo" width="200" align="middle">
 
-![](training.gif)
+![](nbs/training.gif)
 
 ## Install
+To use `neos` right now, you have to seperately install the `fax` library for fixed-point differentiation:
 
-Just run
+`pip install git+https://github.com/gehring/fax.git`
 
-```
-python -m pip install neos
-```
+Then just run
+
+`pip install neos`
 
 ## How to use (and reproduce the results from the cool animation)
 
@@ -81,7 +81,7 @@ def train_network(N):
     _, network = init_random_params(jax.random.PRNGKey(1), (-1, 2))
     state = opt_init(network)
     losses = []
-
+    
     for i in range(N):
         start_time = time.time()
         state, value, network = update_and_value(i,state,1.0)
@@ -98,7 +98,7 @@ maxN = 20 # make me bigger for better results!
 
 # Training
 for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
-    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s')
+    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s') 
 ```
 
     epoch 0: CLs = 0.06680655092981347, took 5.355436325073242s
@@ -123,10 +123,6 @@ for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
     epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
 
 
-And there we go!!
+And there we go!! We discovered a new signal (depending on your arbitrary thershold) ;)
 
-If you want to reproduce the full animation, a version of this code with plotting helpers can be found in [`demo_training.ipynb`](https://github.com/pyhf/neos/blob/master/demo_training.ipynb)! :D
-
-## Thanks
-
-A big thanks to the teams behind [`jax`](https://github.com/google/jax/), [`fax`](https://github.com/gehring/fax), and [`pyhf`](https://github.com/scikit-hep/pyhf) for their software and support.
+If you want to reproduce the full animation, a version of this code with plotting helpers can be found in `demo_training.ipynb`! :D
