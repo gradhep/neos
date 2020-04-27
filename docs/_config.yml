@@ -1,7 +1,7 @@
-repository: phinate/fullstream
+repository: phinate/neos
 output: web
-topnav_title: fullstream
-site_title: fullstream
+topnav_title: neos
+site_title: neos
 company_name: Nathan Simpson, CERN
 description: Library for optimally representing data with neural networks with respect to statistical inference in a particle physics context.
 # Set to false to disable KaTeX math
