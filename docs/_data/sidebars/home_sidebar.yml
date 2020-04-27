@@ -13,8 +13,8 @@ entries:
       title: neos.models
       url: /models
     - output: web,pdf
-      title: Title
-      url: /demo_training
+      title: neos.makers
+      url: /makers
     - output: web,pdf
       title: neos.transforms
       url: /transforms

@@ -2,12 +2,11 @@
 > nice end-to-end optimized statistics ;)
 
 
-[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682) ![CI](https://github.com/pyhf/neos/workflows/CI/badge.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
 
-<img src="neos_logo.png" alt="logo" width="200" align="middle">
+![](nbs/assets/neos_logo.png)
 
-![](training.gif)
+![](nbs/assets/training.gif)
 
 ## Install
 
@@ -16,6 +15,10 @@ Just run
 ```
 python -m pip install neos
 ```
+
+## Contributing
+
+**Please read** [`CONTRIBUTING.md`](https://github.com/pyhf/neos/blob/master/CONTRIBUTING.md) **before making a PR**, as this project is maintained using [`nbdev`](https://github.com/fastai/nbdev), which operates completely using Jupyter notebooks. One should make their changes in the corresponding notebooks in the [`nbs`](nbs) folder (including `README` changes -- see `nbs/index.ipynb`), and not in the library code, which is automatically generated.
 
 ## How to use (and reproduce the results from the cool animation)
 
@@ -81,7 +84,7 @@ def train_network(N):
     _, network = init_random_params(jax.random.PRNGKey(1), (-1, 2))
     state = opt_init(network)
     losses = []
-
+    
     for i in range(N):
         start_time = time.time()
         state, value, network = update_and_value(i,state,1.0)
@@ -98,7 +101,7 @@ maxN = 20 # make me bigger for better results!
 
 # Training
 for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
-    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s')
+    print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s') 
 ```
 
     epoch 0: CLs = 0.06680655092981347, took 5.355436325073242s
