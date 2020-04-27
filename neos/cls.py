@@ -4,6 +4,7 @@ __all__ = ['cls_maker', 'pyhf_cls_maker']
 
 # Cell
 import jax
+import jax.numpy as jnp
 from jax import config
 from jax.experimental import stax
 import pyhf
@@ -20,6 +21,17 @@ from .models import *
 # Cell
 
 def cls_maker(nn_model_maker, solver_kwargs):
+    '''
+    Wraps the construction of the `cls_jax` method.
+
+    Args:
+            nn_model_maker: Function that returns a Model object using the nn parameters.
+
+    Returns:
+            cls_jax: A callable function that takes the parameters of the observable as argument,
+            and returns an expected CLs value from testing the background-only model against the
+            nominal signal hypothesis (or whatever the value of 'test_mu' is)
+    '''
     @jax.jit
     def cls_jax(nn_params, test_mu):
         g_fitter, c_fitter = get_solvers(nn_model_maker, **solver_kwargs)
@@ -30,7 +42,7 @@ def cls_maker(nn_model_maker, solver_kwargs):
         bounds = m.config.suggested_bounds()
 
         # map these
-        initval = jax.numpy.asarray([test_mu, 1.0])
+        initval = jnp.asarray([test_mu, 1.0])
         transforms = solver_kwargs.get("pdf_transform", False)
         if transforms:
             initval = to_inf_vec(initval, bounds)
@@ -45,6 +57,7 @@ def cls_maker(nn_model_maker, solver_kwargs):
             else c_fitter(initval, [test_mu, nn_params])
         )
 
+        # don't have to fit these -- we know them for expected limits!
         denominator = bonlypars  # to_bounded_vec(g_fitter(initval, [test_mu, nn_params]), bounds) if transforms else g_fitter(initval, [test_mu, nn_params])
 
         # print(f"constrained fit: {numerator}")
@@ -57,8 +70,8 @@ def cls_maker(nn_model_maker, solver_kwargs):
 
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
         muhat = denominator[0]
-        sqrtqmu = jax.numpy.sqrt(
-            jax.numpy.where(muhat < test_mu, profile_likelihood, 0.0)
+        sqrtqmu = jnp.sqrt(
+            jnp.where(muhat < test_mu, profile_likelihood, 0.0)
         )
         # print(f"sqrt(q(mu)): {sqrtqmu}")
         # compute CLs
@@ -84,10 +97,10 @@ def pyhf_cls_maker(nn_model_maker, solver_kwargs):
 #         bounds = m.config.suggested_bounds()[0]
 
         names = m.config.par_order
-        bounds = jax.numpy.asarray([m.config.par_map[name]['paramset'].suggested_bounds[0] for name in names])
+        bounds = jnp.asarray([m.config.par_map[name]['paramset'].suggested_bounds[0] for name in names])
 
         # map these
-        initval = jax.numpy.asarray([test_mu, 1.0])
+        initval = jnp.asarray([test_mu, 1.0])
         transforms = solver_kwargs.get("pdf_transform", False)
         if transforms:
             initval = to_inf_vec(initval, bounds)
@@ -114,8 +127,8 @@ def pyhf_cls_maker(nn_model_maker, solver_kwargs):
 
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
         muhat = denominator[0]
-        sqrtqmu = jax.numpy.sqrt(
-            jax.numpy.where(muhat < test_mu, profile_likelihood, 0.0)
+        sqrtqmu = jnp.sqrt(
+            jnp.where(muhat < test_mu, profile_likelihood, 0.0)
         )
         # print(f"sqrt(q(mu)): {sqrtqmu}")
         # compute CLs

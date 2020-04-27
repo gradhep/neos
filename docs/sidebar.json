@@ -5,7 +5,6 @@
     "neos.makers": "/makers",
     "neos.transforms": "/transforms",
     "neos.fit": "/fit",
-    "neos.cls": "/cls",
-    "Title": "/Untitled"
+    "neos.cls": "/cls"
   }
 }

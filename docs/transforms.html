@@ -5,8 +5,8 @@ title: neos.transforms
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "Contains minuit transforms to map from $[-\infty,\infty]$ to a bounded space $[a,b]$ and back."
-description: "Contains minuit transforms to map from $[-\infty,\infty]$ to a bounded space $[a,b]$ and back."
+summary: "Contains transforms to map from $[-\infty,\infty]$ to a bounded space $[a,b]$ and back."
+description: "Contains transforms to map from $[-\infty,\infty]$ to a bounded space $[a,b]$ and back."
 ---
 <!--
 
@@ -27,6 +27,20 @@ description: "Contains minuit transforms to map from $[-\infty,\infty]$ to a bou
 </div>
     {% endraw %}
 
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>This module implements two transforms, taken from the minuit optimizer:</p>
+<p>{% raw %}
+$$P_{\mathrm{inf}}=\arcsin \left(2 \frac{P_{\mathrm{bounded}}-a}{b-a}-1\right):~[a,b] \rightarrow [-\infty,\infty]$$
+{% endraw %}</p>
+<p>{% raw %}
+$$P_{\mathrm{bounded}}=a+\frac{b-a}{2}\left(\sin P_{\mathrm{inf}}+1\right):~[-\infty,\infty]\rightarrow [a,b] $$
+{% endraw %}</p>
+<p>The purpose of these is to add stability to the maximum likelihood fits of the model parameters, which are currently done by gradient descent. This is done by allowing the minimization to occur on the real line, and then mapping the result to a value in a 'sensible' interval $[a,b]$ before evaluating the likelihood. You can imagine if this wasnt the case, it's possible that the likelihood may be evaluated with negative model parameters or very extreme values, potentially causing numeric instability in the likelihood or gradient evaluations.</p>
+
+</div>
+</div>
+</div>
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -146,10 +160,11 @@ description: "Contains minuit transforms to map from $[-\infty,\infty]$ to a bou
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">p</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
-<span class="n">b</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]),</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">])])</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span> <span class="c1"># points</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">],</span> 
+                 <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]])</span> <span class="c1"># bounds</span>
 
-<span class="c1"># check if 1 is invariant</span>
+<span class="c1"># check if 1 is invariant if we transform to bounded space and back</span>
 <span class="n">cond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">to_inf</span><span class="p">(</span><span class="n">to_bounded</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="k">assert</span> <span class="n">cond</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">to_inf</span><span class="p">(</span><span class="n">to_bounded</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1"> != </span><span class="si">{</span><span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
 
@@ -159,339 +174,6 @@ description: "Contains minuit transforms to map from $[-\infty,\infty]$ to a bou
 </pre></div>
 
     </div>
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">bounds</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
-    <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">]</span>
-<span class="p">])</span>
-
-<span class="c1"># check that we map to inf space (i.e. -pi/2 to pi/2)</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">to_inf</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;min: </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s1">, max: </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s1">, to inf:&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-
-
-<span class="c1"># check that we can map very large values to bounded space</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">1e10</span><span class="p">,</span><span class="mf">1e10</span><span class="p">,</span><span class="mi">1001</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">to_bounded</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;min: </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s1">, max: </span><span class="si">{</span><span class="n">w</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s1">, to </span><span class="si">{</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">:&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()],),</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">atol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">),</span> <span class="s1">&#39;Large numbers are not mapped to the bounds of the bounded transform&#39;</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>min: 0.0, max: 10.0, to inf:
--1.5707963267948966 1.5707963267948966
-min: -10000000000.0, max: 10000000000.0, to [ 0 10]:
-2.5122629992990753e-06 9.999997487737
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># define NLL functions in both parameter spaces</span>
-
-<span class="k">def</span> <span class="nf">make_nll_boundspace</span><span class="p">(</span><span class="n">hyperpars</span><span class="p">):</span>
-    <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">db</span> <span class="o">=</span> <span class="n">hyperpars</span>
-    <span class="k">def</span> <span class="nf">nll_boundspace</span><span class="p">(</span><span class="n">pars</span><span class="p">):</span>
-        <span class="n">truth_pars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">m</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">hepdata_like</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">s</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">b</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">db</span><span class="p">]))</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">expected_data</span><span class="p">(</span><span class="n">truth_pars</span><span class="p">))</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">nll_boundspace</span>
-
-<span class="k">def</span> <span class="nf">make_nll_infspace</span><span class="p">(</span><span class="n">hyperpars</span><span class="p">):</span>
-    <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">db</span> <span class="o">=</span> <span class="n">hyperpars</span>
-    <span class="k">def</span> <span class="nf">nll_infspace</span><span class="p">(</span><span class="n">pars</span><span class="p">):</span>
-        <span class="n">truth_pars</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">pars</span> <span class="o">=</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-        
-        <span class="n">m</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">hepdata_like</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">s</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">b</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">db</span><span class="p">]))</span>
-        <span class="n">val</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">logpdf</span><span class="p">(</span><span class="n">pars</span><span class="p">,</span><span class="n">m</span><span class="o">.</span><span class="n">expected_data</span><span class="p">(</span><span class="n">truth_pars</span><span class="p">))</span>
-        <span class="k">return</span> <span class="o">-</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">nll_infspace</span>
-
-
-<span class="n">nll_boundspace</span> <span class="o">=</span> <span class="n">make_nll_boundspace</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
-<span class="n">nll_infspace</span>   <span class="o">=</span> <span class="n">make_nll_infspace</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
-
-<span class="c1"># define a point and compute it in both spaces</span>
-<span class="n">apoint_bnd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
-<span class="n">apoint_inf</span> <span class="o">=</span> <span class="n">to_inf_vec</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-
-<span class="c1"># check consistency in both spaces</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;check consistency in both spaces:&#39;</span><span class="p">)</span>
-<span class="n">point_bound</span> <span class="o">=</span> <span class="n">nll_boundspace</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">)</span>
-<span class="n">point_inf</span> <span class="o">=</span> <span class="n">nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">)</span>
-<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">point_bound</span><span class="p">,</span><span class="n">point_inf</span><span class="p">),</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">point_bound</span><span class="si">}</span><span class="s1"> (bounded) should be close to </span><span class="si">{</span><span class="n">point_inf</span><span class="si">}</span><span class="s1"> (inf)&#39;</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;..good!&#39;</span><span class="p">)</span>
-<span class="c1"># check gradients in bounded</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;gradients in bounded space:&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">nll_boundspace</span><span class="p">)(</span><span class="n">apoint_bnd</span><span class="p">))</span>
-
-<span class="c1"># check gradients in inf</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;gradients in inf space:&#39;</span><span class="p">)</span>
-<span class="n">dl_dpi</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">nll_infspace</span><span class="p">)(</span><span class="n">apoint_inf</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">dl_dinf</span><span class="p">)</span>
-
-<span class="c1"># check consistency of gradients</span>
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;consistency? check with chain rule:&#39;</span><span class="p">)</span>
-<span class="n">dinf_dpb</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span><span class="n">b</span><span class="p">:</span> <span class="n">to_inf_vec</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">b</span><span class="p">)[</span><span class="n">i</span><span class="p">])(</span><span class="n">apoint_bnd</span><span class="p">,</span><span class="n">bounds</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]))</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>check consistency in both spaces:
-..good!
-gradients in bounded space:
-[ -0.96078431 -99.05962385]
-gradients in inf space:
-[  -2.09398087 -309.31357633]
-consistency?
-[ -0.96078431 -99.05962385]
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">fit_nll_bounded</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">hyperpars</span><span class="p">):</span>
-    <span class="n">mu</span><span class="p">,</span> <span class="n">model_pars</span> <span class="o">=</span> <span class="n">hyperpars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">hyperpars</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">objective</span> <span class="o">=</span> <span class="n">make_nll_boundspace</span><span class="p">(</span><span class="n">model_pars</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">init</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">)</span><span class="o">.</span><span class="n">x</span>
-
-<span class="k">def</span> <span class="nf">fit_nll_infspace</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">hyperpars</span><span class="p">):</span>
-    <span class="n">mu</span><span class="p">,</span> <span class="n">model_pars</span> <span class="o">=</span> <span class="n">hyperpars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">hyperpars</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">objective</span> <span class="o">=</span> <span class="n">make_nll_infspace</span><span class="p">(</span><span class="n">model_pars</span><span class="p">)</span>
-    <span class="c1"># result = scipy.optimize.minimize(objective, x0 = init).x</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="n">funnyscipy</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">init</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-
-<span class="c1"># fit in bounded space</span>
-<span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy minim in bounded space&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">7</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">2</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="o">.</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="o">.</span><span class="mi">01</span><span class="p">]))</span>
-
-<span class="c1"># fit in inf space</span>
-<span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;scipy minim in inf space&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">7</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">2</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="o">.</span><span class="mi">1</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="o">.</span><span class="mi">01</span><span class="p">]))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_infspace</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="o">.</span><span class="mi">001</span><span class="p">]))</span>
-
-
-<span class="k">def</span> <span class="nf">nn_model_maker</span><span class="p">(</span><span class="n">nn_params</span><span class="p">):</span>
-    <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">db</span> <span class="o">=</span> <span class="n">nn_params</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">hepdata_like</span><span class="p">(</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">s</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">b</span><span class="p">]),</span><span class="n">jnp</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">db</span><span class="p">]))</span>
-    <span class="n">nompars</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">suggested_init</span><span class="p">()</span>
-    <span class="n">bonlypars</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nompars</span><span class="p">])</span>
-    <span class="n">bonlypars</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">ops</span><span class="o">.</span><span class="n">index_update</span><span class="p">(</span><span class="n">bonlypars</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">poi_index</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">m</span><span class="p">,</span> <span class="n">bonlypars</span>
-
-<span class="n">g_fitter</span><span class="p">,</span> <span class="n">c_fitter</span> <span class="o">=</span> <span class="n">fit</span><span class="o">.</span><span class="n">get_solvers</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-4</span><span class="p">)</span>
-
-<span class="n">bounds</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mf">0.</span><span class="p">,</span><span class="mi">10</span><span class="p">],[</span><span class="mf">0.</span><span class="p">,</span><span class="mf">10.</span><span class="p">]])</span>
-
-<span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;diffable minim in inf space&#39;</span><span class="p">)</span>
-    <span class="n">apoint_bnd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
-    <span class="n">apoint_inf</span> <span class="o">=</span> <span class="n">to_inf_vec</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">7.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">2.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">0.5</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">0.1</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">0.01</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">55</span><span class="p">,</span><span class="mf">1.5</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mf">1.5</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">2</span><span class="p">,</span><span class="mi">90</span><span class="p">,</span><span class="mf">1.5</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;global fit grad&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">15.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">10.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">7.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">g_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">0</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]))</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;constrained!&#39;</span><span class="p">)</span>
-
-<span class="n">apoint_bnd</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span><span class="mf">1.0</span><span class="p">])</span>
-<span class="n">apoint_inf</span> <span class="o">=</span> <span class="n">to_inf_vec</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,</span><span class="n">bounds</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">15.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">10.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">7.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,[</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">0.1</span><span class="p">]]),</span><span class="n">bounds</span><span class="p">))</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;constrained fit grad&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">1</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">15.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">1</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">10.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">1</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">7.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">1</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">1.0</span><span class="p">]))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">to_bounded_vec</span><span class="p">(</span><span class="n">c_fitter</span><span class="p">(</span><span class="n">apoint_inf</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="n">x</span><span class="p">]),</span><span class="n">bounds</span><span class="p">)[</span><span class="mi">1</span><span class="p">])([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">]))</span>
-
-<span class="k">def</span> <span class="nf">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">init</span><span class="p">,</span> <span class="n">hyperpars</span><span class="p">,</span><span class="n">fixed_val</span><span class="p">):</span>
-    <span class="n">mu</span><span class="p">,</span> <span class="n">model_pars</span> <span class="o">=</span> <span class="n">hyperpars</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">hyperpars</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-    <span class="n">objective</span> <span class="o">=</span> <span class="n">make_nll_boundspace</span><span class="p">(</span><span class="n">model_pars</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">scipy</span><span class="o">.</span><span class="n">optimize</span><span class="o">.</span><span class="n">minimize</span><span class="p">(</span><span class="n">objective</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">init</span><span class="p">,</span> <span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">constraints</span><span class="o">=</span><span class="p">[{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;eq&#39;</span><span class="p">,</span> <span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">fixed_val</span><span class="p">}])</span><span class="o">.</span><span class="n">x</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;reference&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">15.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">10.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">fit_nll_bounded_constrained</span><span class="p">(</span><span class="n">apoint_bnd</span><span class="p">,[</span><span class="mf">1.0</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;diffable cls&#39;</span><span class="p">)</span>
-
-<span class="n">j_cls</span> <span class="o">=</span> <span class="p">[]</span>
-
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">15.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">10.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">10.</span><span class="p">,</span><span class="mf">5.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-<span class="n">j_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jax</span><span class="o">.</span><span class="n">value_and_grad</span><span class="p">(</span><span class="n">cls_maker</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">,</span><span class="n">solver_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">pdf_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)))([</span><span class="mf">15.</span><span class="p">,</span><span class="mf">5.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-
-
-<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;cross check cls&#39;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">pyhf_cls</span><span class="p">(</span><span class="n">nn_params</span><span class="p">,</span><span class="n">mu</span><span class="p">):</span>
-    <span class="n">s</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">db</span> <span class="o">=</span>  <span class="n">nn_params</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">pyhf</span><span class="o">.</span><span class="n">simplemodels</span><span class="o">.</span><span class="n">hepdata_like</span><span class="p">([</span><span class="n">s</span><span class="p">],[</span><span class="n">b</span><span class="p">],[</span><span class="n">db</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">pyhf</span><span class="o">.</span><span class="n">infer</span><span class="o">.</span><span class="n">hypotest</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,[</span><span class="n">b</span><span class="p">]</span><span class="o">+</span><span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">auxdata</span><span class="p">,</span><span class="n">m</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
- 
-<span class="n">p_cls</span> <span class="o">=</span> <span class="p">[]</span>
-    
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">15.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">10.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">7.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">1.0</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">5.</span><span class="p">,</span><span class="mf">50.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">10.</span><span class="p">,</span><span class="mf">5.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-<span class="n">p_cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pyhf_cls</span><span class="p">([</span><span class="mf">15.</span><span class="p">,</span><span class="mf">5.</span><span class="p">,</span><span class="mf">0.1</span><span class="p">],</span><span class="mf">1.0</span><span class="p">))</span>
-
-<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">j_cls</span><span class="p">),</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p_cls</span><span class="p">)),</span> <span class="s1">&#39;cls values don</span><span class="se">\&#39;</span><span class="s1">t match pyhf&#39;</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-<div class="output_area">
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>min: 0.0, max: 10.0, to inf:
--1.5707963267948966 1.5707963267948966
-min: -1000.0, max: 1000.0, to [ 0 10]:
-4.8302469145555804e-05 9.999951697530854
-check consistency in both spaces:
-24.784977033304045
-24.78497703330399
-gradients in bounded space:
-[ -0.96078431 -99.05962385]
-gradients in inf space:
-[  -2.09398087 -309.31357633]
-consistency?
-[ -0.96078431 -99.05962385]
-global fit grad
-(DeviceArray(4.77951012e-13, dtype=float64), [DeviceArray(-1.91202209e-13, dtype=float64), DeviceArray(2.25928389e-14, dtype=float64), DeviceArray(-2.31721422e-14, dtype=float64)])
-(DeviceArray(2.0206059e-13, dtype=float64), [DeviceArray(-8.07998242e-14, dtype=float64), DeviceArray(1.0769071e-14, dtype=float64), DeviceArray(-2.69226775e-14, dtype=float64)])
-(DeviceArray(1.17128529e-13, dtype=float64), [DeviceArray(nan, dtype=float64), DeviceArray(nan, dtype=float64), DeviceArray(nan, dtype=float64)])
-(DeviceArray(7.49400542e-14, dtype=float64), [DeviceArray(nan, dtype=float64), DeviceArray(nan, dtype=float64), DeviceArray(nan, dtype=float64)])
-constrained!
-[1.         0.91976327]
-[1.         0.93563135]
-[1.         0.95299143]
-[1.         0.99821931]
-[1.         0.99998647]
-constrained fit grad
-(DeviceArray(0.91976327, dtype=float64), [DeviceArray(-0.01570885, dtype=float64), DeviceArray(0.00188766, dtype=float64), DeviceArray(-0.00211123, dtype=float64)])
-(DeviceArray(0.93563135, dtype=float64), [DeviceArray(-0.01240237, dtype=float64), DeviceArray(0.00169771, dtype=float64), DeviceArray(-0.00457567, dtype=float64)])
-(DeviceArray(0.95299143, dtype=float64), [DeviceArray(-0.00890556, dtype=float64), DeviceArray(0.00138767, dtype=float64), DeviceArray(-0.00710027, dtype=float64)])
-(DeviceArray(0.99821931, dtype=float64), [DeviceArray(-0.0003251, dtype=float64), DeviceArray(6.73871338e-05, dtype=float64), DeviceArray(-0.00349722, dtype=float64)])
-(DeviceArray(0.99998647, dtype=float64), [DeviceArray(-2.78601582e-06, dtype=float64), DeviceArray(4.28295151e-07, dtype=float64), DeviceArray(-0.00022806, dtype=float64)])
-reference
-[1.         0.91979939]
-[1.         0.93570921]
-[1.         0.95295097]
-[1.        0.9982233]
-[1.         0.99998182]
-diffable cls
-cross check cls
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 

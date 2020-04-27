@@ -2,20 +2,23 @@
 > nice end-to-end optimized statistics ;)
 
 
-[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682) ![CI](https://github.com/pyhf/neos/workflows/CI/badge.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
 
-<img src="nbs/neos_logo.png" alt="logo" width="200" align="middle">
+![](nbs/assets/neos_logo.png)
 
-![](nbs/training.gif)
+![](nbs/assets/training.gif)
 
 ## Install
-To use `neos` right now, you have to seperately install the `fax` library for fixed-point differentiation:
 
-`pip install git+https://github.com/gehring/fax.git`
+Just run
 
-Then just run
+```
+python -m pip install neos
+```
 
-`pip install neos`
+## Contributing
+
+**Please read** [`CONTRIBUTING.md`](https://github.com/pyhf/neos/blob/master/CONTRIBUTING.md) **before making a PR**, as this project is maintained using [`nbdev`](https://github.com/fastai/nbdev), which operates completely using Jupyter notebooks. One should make their changes in the corresponding notebooks in the [`nbs`](nbs) folder (including `README` changes -- see `nbs/index.ipynb`), and not in the library code, which is automatically generated.
 
 ## How to use (and reproduce the results from the cool animation)
 
@@ -123,6 +126,10 @@ for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
     epoch 19: CLs = 0.0023454051342963744, took 1.5911424160003662s
 
 
-And there we go!! We discovered a new signal (depending on your arbitrary thershold) ;)
+And there we go!!
 
-If you want to reproduce the full animation, a version of this code with plotting helpers can be found in `demo_training.ipynb`! :D
+If you want to reproduce the full animation, a version of this code with plotting helpers can be found in [`demo_training.ipynb`](https://github.com/pyhf/neos/blob/master/demo_training.ipynb)! :D
+
+## Thanks
+
+A big thanks to the teams behind [`jax`](https://github.com/google/jax/), [`fax`](https://github.com/gehring/fax), and [`pyhf`](https://github.com/scikit-hep/pyhf) for their software and support.

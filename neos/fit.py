@@ -19,6 +19,20 @@ def get_solvers(
     default_max_iter=int(1e7),
     learning_rate = 0.01
 ):
+    '''
+    Wraps a series of functions that perform maximum likelihood fitting in the
+    `two_phase_solver` method found in the `fax` python module. This allows for
+    the calculation of gradients of the best-fit parameters with respect to upstream
+    parameters that control the underlying model, i.e. the event yields (which are
+    then parameterized by weights or similar).
+
+    Args:
+            model_constructor: Function that takes in the parameters of the observable,
+            and returns a model object (and background-only parameters)
+    Returns:
+            g_fitter, c_fitter: Callable functions that perform global and constrained fits
+            respectively. Differentiable :)
+    '''
 
     adam_init, adam_update, adam_get_params  = optimizers.adam(1e-6)
 

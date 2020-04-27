@@ -5,7 +5,7 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 index = {"Model": "00_models.ipynb",
          "hepdata_like": "00_models.ipynb",
          "hists_from_nn_three_blobs": "01_makers.ipynb",
-         "kde_counts_from_nn_three_blobs": "01_makers.ipynb",
+         "kde_bins_from_nn_three_blobs": "01_makers.ipynb",
          "nn_hepdata_like": "01_makers.ipynb",
          "to_bounded_vec": "02_transforms.ipynb",
          "to_bounded": "02_transforms.ipynb",

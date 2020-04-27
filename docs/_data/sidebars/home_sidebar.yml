@@ -24,9 +24,6 @@ entries:
     - output: web,pdf
       title: neos.cls
       url: /cls
-    - output: web,pdf
-      title: Title
-      url: /Untitled
     output: web
     title: neos
   output: web

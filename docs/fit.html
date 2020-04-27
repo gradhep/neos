@@ -5,8 +5,8 @@ title: neos.fit
 keywords: fastai
 sidebar: home_sidebar
 
-summary: "Module that wraps constrained + global fitters in a differentiable form using the module fax. Uses the two-phase-solver."
-description: "Module that wraps constrained + global fitters in a differentiable form using the module fax. Uses the two-phase-solver."
+summary: "Module containing functions to perform maximum likelihod fits in a differentiable way."
+description: "Module containing functions to perform maximum likelihod fits in a differentiable way."
 ---
 <!--
 
@@ -27,6 +27,15 @@ description: "Module that wraps constrained + global fitters in a differentiable
 </div>
     {% endraw %}
 
+<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The <code>fax</code> module is leveraged to calculate gradients of maximum likelihood fits through the 'two-phase' method, which is a technique for automatic differentiation of functions with an attractive fixed point, i.e. they satisfy $f(x) - x = 0$. This is the case for a minimization routine, where the minimization occurs from the minimum: <code>minimize(f, x_init) = x_min</code> --&gt; <code>minimize(f, x_init=x_min) = x_min</code>. You can imagine that the initial iterations won't give any useful information in terms of the gradient of the minimum; this approach leverages this fact by performing the minimization a second time in the neighborhood of the fixed point, and keeping track of gradients there, which avoids the unnecessary unrolling of many loops for the early iteration.</p>
+<p>To read more about this method, see section 2.3 of <a href="https://www.researchgate.net/profile/Ala_Taftaf2/publication/323176030_ADJOINTS_OF_FIXED-POINT_ITERATIONS/links/5a8465644585159152b7fe00/ADJOINTS-OF-FIXED-POINT-ITERATIONS.pdf">this paper</a> that looks at some methods to approach the fixed-point differation problem within automatic differentiation.</p>
+<p>The fits themselves are done by gradient descent with Adam.</p>
+
+</div>
+</div>
+</div>
     {% raw %}
     
 <div class="cell border-box-sizing code_cell rendered">
@@ -54,6 +63,17 @@ description: "Module that wraps constrained + global fitters in a differentiable
 <div class="output_markdown rendered_html output_subarea ">
 <h4 id="get_solvers" class="doc_header"><code>get_solvers</code><a href="https://github.com/phinate/neos/tree/master/neos/fit.py#L14" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>get_solvers</code>(<strong><code>model_constructor</code></strong>, <strong><code>pdf_transform</code></strong>=<em><code>False</code></em>, <strong><code>default_rtol</code></strong>=<em><code>1e-10</code></em>, <strong><code>default_atol</code></strong>=<em><code>1e-10</code></em>, <strong><code>default_max_iter</code></strong>=<em><code>10000000</code></em>, <strong><code>learning_rate</code></strong>=<em><code>0.01</code></em>)</p>
 </blockquote>
+<p>Wraps a series of functions that perform maximum likelihood fitting in the
+<code>two_phase_solver</code> method found in the <code>fax</code> python module. This allows for
+the calculation of gradients of the best-fit parameters with respect to upstream
+parameters that control the underlying model, i.e. the event yields (which are
+then parameterized by weights or similar).</p>
+<p>Args:
+        model_constructor: Function that takes in the parameters of the observable,
+        and returns a model object (and background-only parameters)
+Returns:
+        g_fitter, c_fitter: Callable functions that perform global and constrained fits
+        respectively. Differentiable :)</p>
 
 </div>
 
@@ -65,43 +85,6 @@ description: "Module that wraps constrained + global fitters in a differentiable
 </div>
     {% endraw %}
 
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="getting-test">getting test<a class="anchor-link" href="#getting-test"> </a></h4>
-</div>
-</div>
-</div>
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">neos.models</span> <span class="kn">import</span> <span class="n">nn_model_maker</span>
-
-<span class="n">g_fitter</span><span class="p">,</span> <span class="n">c_fitter</span> <span class="o">=</span> <span class="n">get_solvers</span><span class="p">(</span><span class="n">nn_model_maker</span><span class="p">)</span>
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-    {% endraw %}
-
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="non-transformed-fit-test">non-transformed fit test<a class="anchor-link" href="#non-transformed-fit-test"> </a></h4>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="transformed-fit-test">transformed fit test<a class="anchor-link" href="#transformed-fit-test"> </a></h4>
-</div>
-</div>
-</div>
 </div>
  
 
