@@ -36,14 +36,14 @@ description: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="/neos/assets/neos_logo.png" alt=""></p>
+<p>{% include image.html alt="neos logo" max-width="250" file="/neos/assets/neos_logo.png" %}</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p><img src="/neos/assets/training.gif" alt=""></p>
+<p><img src="/neos/assets/pyhf_3.gif" alt=""></p>
 
 </div>
 </div>
@@ -66,7 +66,7 @@ description: "nice end-to-end optimized statistics ;)"
 </div>
 <div class="cell border-box-sizing text_cell rendered"><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="How-to-use-(and-reproduce-the-results-from-the-cool-animation)">How to use (and reproduce the results from the cool animation)<a class="anchor-link" href="#How-to-use-(and-reproduce-the-results-from-the-cool-animation)"> </a></h2>
+<h2 id="Example-using-a-sigmoid-based-neural-network:">Example using a sigmoid-based neural network:<a class="anchor-link" href="#Example-using-a-sigmoid-based-neural-network:"> </a></h2>
 </div>
 </div>
 </div>
@@ -132,7 +132,7 @@ description: "nice end-to-end optimized statistics ;)"
 <li><code>nn_hepdata_like(hmaker)</code> uses <code>hmaker</code> to construct histograms, then feeds them into the <code>neos.models.hepdata_like</code> function that constructs a pyhf-like model. This can then be used to call things like <code>logpdf</code> and <code>expected_data</code> downstream.</li>
 <li><a href="/neos/cls#cls_maker"><code>cls_maker</code></a> takes a model-making function as it's primary argument, which is fed into functions from <code>neos.fit</code> that minimise the <code>logpdf</code> of the model in both a constrained (fixed parameter of interest) and a global way. Moreover, these fits are wrapped in a function that allows us to calculate gradients through the fits using <em>fixed-point differentiation</em>. This allows for the calculation of both the profile likelihood and its gradient, and then the same for cls :)</li>
 </ul>
-<p>All three of these methods return functions. in particular, <a href="/neos/cls#cls_maker"><code>cls_maker</code></a> returns a function that differentiably calculates cls values, which is our desired objective to minimise.</p>
+<p>All three of these methods return functions. in particular, <a href="/neos/cls#cls_maker"><code>cls_maker</code></a> returns a function that differentiably calculates CLs values, which is our desired objective to minimise.</p>
 
 </div>
 </div>

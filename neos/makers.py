@@ -234,8 +234,8 @@ def nn_hepdata_like(histogram_maker):
     def nn_model_maker(network):
         s, b, db = hm(network)
 #         print(f's={s}, b={b}, db={db}')
-        m = pyhf.simplemodels.hepdata_like(s, b, db) # pyhf model
-#         m = models.hepdata_like(s, b, db) # neos model
+#         m = pyhf.simplemodels.hepdata_like(s, b, db) # pyhf model
+        m = models.hepdata_like(s, b, db) # neos model
         nompars = m.config.suggested_init()
         bonlypars = jax.numpy.asarray([x for x in nompars])
         bonlypars = jax.ops.index_update(bonlypars, m.config.poi_index, 0.0)
@@ -244,6 +244,7 @@ def nn_hepdata_like(histogram_maker):
     nn_model_maker.hm = hm
     return nn_model_maker
 
+# Cell
 def nn_histosys(histogram_maker):
     '''
     Returns a function that constructs a HEP statistical model using a 'histosys'
@@ -307,6 +308,5 @@ def nn_histosys(histogram_maker):
         bonlypars = jax.numpy.asarray([x for x in nompars])
         bonlypars = jax.ops.index_update(bonlypars, m.config.poi_index, 0.0)
         return m, bonlypars
-
     nn_model_maker.hm = hm
     return nn_model_maker

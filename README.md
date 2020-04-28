@@ -4,9 +4,9 @@
 
 [![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682) ![CI](https://github.com/pyhf/neos/workflows/CI/badge.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
 
-![](nbs/assets/neos_logo.png)
+<img src="nbs/assets/neos_logo.png" alt="neos logo" width="250">
 
-![](nbs/assets/training.gif)
+![](nbs/assets/pyhf_3.gif)
 
 ## Install
 
@@ -20,7 +20,7 @@ python -m pip install neos
 
 **Please read** [`CONTRIBUTING.md`](https://github.com/pyhf/neos/blob/master/CONTRIBUTING.md) **before making a PR**, as this project is maintained using [`nbdev`](https://github.com/fastai/nbdev), which operates completely using Jupyter notebooks. One should make their changes in the corresponding notebooks in the [`nbs`](nbs) folder (including `README` changes -- see `nbs/index.ipynb`), and not in the library code, which is automatically generated.
 
-## How to use (and reproduce the results from the cool animation)
+## Example using a sigmoid-based neural network:
 
 ```python
 import jax
@@ -54,7 +54,7 @@ The way we initialise in `neos` is to define functions that make a statistical m
 - `nn_hepdata_like(hmaker)` uses `hmaker` to construct histograms, then feeds them into the `neos.models.hepdata_like` function that constructs a pyhf-like model. This can then be used to call things like `logpdf` and `expected_data` downstream.
 - `cls_maker` takes a model-making function as it's primary argument, which is fed into functions from `neos.fit` that minimise the `logpdf` of the model in both a constrained (fixed parameter of interest) and a global way. Moreover, these fits are wrapped in a function that allows us to calculate gradients through the fits using *fixed-point differentiation*. This allows for the calculation of both the profile likelihood and its gradient, and then the same for cls :)
 
-All three of these methods return functions. in particular, `cls_maker` returns a function that differentiably calculates cls values, which is our desired objective to minimise.
+All three of these methods return functions. in particular, `cls_maker` returns a function that differentiably calculates CLs values, which is our desired objective to minimise.
 
 ```python
 hmaker = makers.hists_from_nn_three_blobs(predict)

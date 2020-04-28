@@ -24,6 +24,15 @@ entries:
     - output: web,pdf
       title: neos.cls
       url: /cls
+    - output: web,pdf
+      title: Testing out new kde-based method!
+      url: /demo_kde
+    - output: web,pdf
+      title: KDE demo, with histosys!
+      url: /demo_kde_pyhf
+    - output: web,pdf
+      title: The simple 2-bin demo w/ sigmoid activation
+      url: /demo_sigmoid
     output: web
     title: neos
   output: web
