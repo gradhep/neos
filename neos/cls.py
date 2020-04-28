@@ -97,7 +97,7 @@ def pyhf_cls_maker(nn_model_maker, solver_kwargs):
 #         bounds = m.config.suggested_bounds()[0]
 
         names = m.config.par_order
-        bounds = jnp.asarray([m.config.par_map[name]['paramset'].suggested_bounds[0] for name in names])
+        bounds = m.config.suggested_bounds()
 
         # map these
         initval = jnp.asarray([test_mu, 1.0])
