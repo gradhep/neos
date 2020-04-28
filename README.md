@@ -22,7 +22,7 @@ python -m pip install neos
 
 ## Example using a sigmoid-based neural network:
 
-```python
+```
 import jax
 import neos.makers as makers
 import neos.cls as cls
@@ -35,7 +35,7 @@ import time
 
 ### Initialise network using `jax.experimental.stax`
 
-```python
+```
 init_random_params, predict = stax.serial(
     stax.Dense(1024),
     stax.Relu,
@@ -56,13 +56,13 @@ The way we initialise in `neos` is to define functions that make a statistical m
 
 All three of these methods return functions. in particular, `cls_maker` returns a function that differentiably calculates CLs values, which is our desired objective to minimise.
 
-```python
+```
 hmaker = makers.hists_from_nn_three_blobs(predict)
 nnm = makers.nn_hepdata_like(hmaker)
 loss = cls.cls_maker(nnm, solver_kwargs=dict(pdf_transform=True))
 ```
 
-```python
+```
 _, network = init_random_params(jax.random.PRNGKey(2), (-1, 2))
 ```
 
@@ -71,7 +71,7 @@ _, network = init_random_params(jax.random.PRNGKey(2), (-1, 2))
 
 ### Define training loop!
 
-```python
+```
 opt_init, opt_update, opt_params = optimizers.adam(1e-3)
 
 def update_and_value(i, opt_state, mu):
@@ -96,7 +96,7 @@ def train_network(N):
 
 ### Let's run it!!
 
-```python
+```
 maxN = 20 # make me bigger for better results!
 
 # Training
