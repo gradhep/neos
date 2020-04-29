@@ -13,6 +13,7 @@ jobs:
       run: |
         pip install nbdev jupyter
         pip install -e .
+        pip install git+https://github.com/phinate/pyhf.git@diffable_json
     - name: Read all notebooks
       run: |
         nbdev_read_nbs
@@ -20,6 +21,7 @@ jobs:
       run: |
         echo "Check we are starting with clean git checkout"
         git status
+        more settings.ini
         if [ -n "$(git status -uno -s)" ]; then echo "git status is not clean"; false; fi
         echo "Trying to strip out notebooks"
         nbdev_clean_nbs
