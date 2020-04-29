@@ -13,6 +13,7 @@ jobs:
       run: |
         pip install nbdev jupyter
         pip install -e .
+        pip install git+https://github.com/phinate/pyhf.git@diffable_json
     - name: Read all notebooks
       run: |
         nbdev_read_nbs
