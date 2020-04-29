@@ -8,6 +8,6 @@
     "neos.cls": "/cls",
     "Testing out new kde-based method!": "/demo_kde",
     "KDE demo, with histosys!": "/demo_kde_pyhf",
-    "The simple 2-bin demo w/ sigmoid activation": "/demo_sigmoid"
+    "The simple 2-bin demo w/ sigmoid activation": "/demo_softmax"
   }
 }

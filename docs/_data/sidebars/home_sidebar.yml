@@ -32,7 +32,7 @@ entries:
       url: /demo_kde_pyhf
     - output: web,pdf
       title: The simple 2-bin demo w/ sigmoid activation
-      url: /demo_sigmoid
+      url: /demo_softmax
     output: web
     title: neos
   output: web
