@@ -5,6 +5,7 @@ __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 index = {"Model": "00_models.ipynb",
          "hepdata_like": "00_models.ipynb",
          "hists_from_nn_three_blobs": "01_makers.ipynb",
+         "hists_from_nn_three_samples": "01_makers.ipynb",
          "kde_bins_from_nn_three_blobs": "01_makers.ipynb",
          "kde_bins_from_nn_histosys": "01_makers.ipynb",
          "nn_hepdata_like": "01_makers.ipynb",
@@ -15,6 +16,7 @@ index = {"Model": "00_models.ipynb",
          "to_inf": "02_transforms.ipynb",
          "get_solvers": "03_fit.ipynb",
          "cls_maker": "04_cls.ipynb",
+         "cls_maker2": "04_cls.ipynb",
          "pyhf_cls_maker": "04_cls.ipynb"}
 
 modules = ["models.py",
