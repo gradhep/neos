@@ -1,10 +1,10 @@
 SRC = $(wildcard ./*.ipynb)
 
-all: fullstream docs
+all: neos docs
 
-fullstream: $(SRC)
+neos: $(SRC)
 	nbdev_build_lib
-	touch fullstream
+	touch neos
 
 docs_serve: docs
 	cd docs && bundle exec jekyll serve
