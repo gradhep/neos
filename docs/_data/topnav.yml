@@ -2,7 +2,7 @@ topnav:
 - title: Topnav
   items:
     - title: GitHub
-      external_url: https://github.com/phinate/fullstream
+      external_url: https://github.com/pyhf/neos
 
 #Topnav dropdowns
 topnav_dropdowns:
