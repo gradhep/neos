@@ -67,7 +67,7 @@ description: "Functions that define the workflow from parametric observable --> 
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hists_from_nn_three_blobs" class="doc_header"><code>hists_from_nn_three_blobs</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L16" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn_three_blobs</code>(<strong><code>predict</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2, 2]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-1, -1]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
+<h4 id="hists_from_nn_three_blobs" class="doc_header"><code>hists_from_nn_three_blobs</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L17" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn_three_blobs</code>(<strong><code>predict</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2, 2]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-1, -1]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
 </blockquote>
 <p>Uses the nn decision function <code>predict</code> to form histograms from signal and background
 data, all drawn from multivariate normal distributions with different means. Two
@@ -112,7 +112,7 @@ standard deviation.</p>
 <span class="n">init_random_params</span><span class="p">,</span> <span class="n">predict</span> <span class="o">=</span> <span class="n">stax</span><span class="o">.</span><span class="n">serial</span><span class="p">(</span>
     <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
     <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="c1"># Two node output -&gt; two bins!</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>  <span class="c1"># Two node output -&gt; two bins!</span>
     <span class="n">stax</span><span class="o">.</span><span class="n">Softmax</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -178,12 +178,14 @@ standard deviation.</p>
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">129</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">129</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C9&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sig&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">b_unc</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span> <span class="o">-</span> <span class="n">b_unc</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg error&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;nn output&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;frequency&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">b_unc</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span> <span class="o">-</span> <span class="n">b_unc</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg error&quot;</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;nn output&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;frequency&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 
@@ -248,7 +250,7 @@ standard deviation.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="kde_bins_from_nn_three_blobs" class="doc_header"><code>kde_bins_from_nn_three_blobs</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L69" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>kde_bins_from_nn_three_blobs</code>(<strong><code>predict</code></strong>, <strong><code>bins</code></strong>, <strong><code>bandwidth</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2, 2]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-1, -1]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
+<h4 id="kde_bins_from_nn_three_blobs" class="doc_header"><code>kde_bins_from_nn_three_blobs</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L78" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>kde_bins_from_nn_three_blobs</code>(<strong><code>predict</code></strong>, <strong><code>bins</code></strong>, <strong><code>bandwidth</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2, 2]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-1, -1]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
 </blockquote>
 <p>Exactly the same as <a href="/neos/makers#hists_from_nn_three_blobs"><code>hists_from_nn_three_blobs</code></a>, but takes in a regression network, and
 forms a kernel density estimate (kde) for the output. The yields are then calculated as
@@ -295,19 +297,16 @@ be specified using the argument <code>bins</code>.</p>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">init_random_params</span><span class="p">,</span> <span class="n">predict</span> <span class="o">=</span> <span class="n">stax</span><span class="o">.</span><span class="n">serial</span><span class="p">(</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="c1"># One node for regression</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span> <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">stax</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>  <span class="c1"># One node for regression</span>
 <span class="p">)</span>
 
 <span class="c1"># need to pre-specify binning: use 0-1 range from sigmoid</span>
 <span class="c1"># NB: should work with relu etc too, just have to make a binning choice</span>
-<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">centers</span>   <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span> <span class="c1"># for plotting</span>
+<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>  <span class="c1"># for plotting</span>
 
 <span class="c1"># pick a bandwidth</span>
-<span class="n">bin_width</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">bin_width</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">bandwidth</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">bin_width</span>
 
 <span class="n">hist_maker</span> <span class="o">=</span> <span class="n">kde_bins_from_nn_three_blobs</span><span class="p">(</span><span class="n">predict</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">)</span>
@@ -370,12 +369,20 @@ be specified using the argument <code>bins</code>.</p>
 
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">),</span><span class="n">dpi</span><span class="o">=</span><span class="mi">129</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C9&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sig&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">b_unc</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span> <span class="o">-</span> <span class="n">b_unc</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg error&quot;</span><span class="p">,</span><span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;nn output&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;frequency&#39;</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">129</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C1&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;C9&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;sig&quot;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
+    <span class="n">centers</span><span class="p">,</span>
+    <span class="n">b_unc</span><span class="p">,</span>
+    <span class="n">bottom</span><span class="o">=</span><span class="n">b</span> <span class="o">-</span> <span class="n">b_unc</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;bkg error&quot;</span><span class="p">,</span>
+    <span class="n">width</span><span class="o">=</span><span class="n">bin_width</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;nn output&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;frequency&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 </pre></div>
 
@@ -432,7 +439,58 @@ be specified using the argument <code>bins</code>.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="kde_bins_from_nn_histosys" class="doc_header"><code>kde_bins_from_nn_histosys</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L141" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>kde_bins_from_nn_histosys</code>(<strong><code>predict</code></strong>, <strong><code>bins</code></strong>, <strong><code>bandwidth</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2.5, 2]</code></em>, <strong><code>b_mean</code></strong>=<em><code>[1, -1]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-2.5, -1.5]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
+<h4 id="kde_bins_from_nn_histosys" class="doc_header"><code>kde_bins_from_nn_histosys</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L163" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>kde_bins_from_nn_histosys</code>(<strong><code>predict</code></strong>, <strong><code>bins</code></strong>, <strong><code>bandwidth</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2.5, 2]</code></em>, <strong><code>b_mean</code></strong>=<em><code>[1, -1]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-2.5, -1.5]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
+</blockquote>
+<p>Exactly the same as <a href="/neos/makers#hists_from_nn_three_blobs"><code>hists_from_nn_three_blobs</code></a>, but takes in a regression network, and
+forms a kernel density estimate (kde) for the output. The yields are then calculated as
+the integral of the kde's cumulative density function between the bin edges, which should
+be specified using the argument <code>bins</code>.</p>
+<p>Args:
+        predict: Decision function for a parameterized observable. When evaluated, the
+        output should be one number per event, i.e. a regression network or similar.</p>
+
+<pre><code>    bins: Array of bin edges, e.g. np.linspace(0,1,3) defines a two-bin histogram with
+    edges at 0, 0.5, 1.
+
+    bandwidth: Float that controls the 'smoothness' of the kde. It's recommended to keep
+    this lower than the bin width to avoid oversmoothing the distribution. Going too low
+    will cause things to break, as the gradients of the kde become unstable. 0.1*bin_width
+    is a good rule of thumb, but we have yet to properly validate this practically.
+
+</code></pre>
+<p>Returns:
+        hist_maker: A callable function that takes the parameters of the observable,
+        then constructs signal, background, and background uncertainty yields.</p>
+
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
+
+<div class="output_wrapper">
+<div class="output">
+
+<div class="output_area">
+
+
+<div class="output_markdown rendered_html output_subarea ">
+<h4 id="soft_bins_from_nn_histosys" class="doc_header"><code>soft_bins_from_nn_histosys</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L248" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>soft_bins_from_nn_histosys</code>(<strong><code>predict</code></strong>, <strong><code>bins</code></strong>, <strong><code>bandwidth</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>[-1, 1]</code></em>, <strong><code>b1_mean</code></strong>=<em><code>[2.5, 2]</code></em>, <strong><code>b_mean</code></strong>=<em><code>[1, -1]</code></em>, <strong><code>b2_mean</code></strong>=<em><code>[-2.5, -1.5]</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
 </blockquote>
 <p>Exactly the same as <a href="/neos/makers#hists_from_nn_three_blobs"><code>hists_from_nn_three_blobs</code></a>, but takes in a regression network, and
 forms a kernel density estimate (kde) for the output. The yields are then calculated as
@@ -489,7 +547,7 @@ be specified using the argument <code>bins</code>.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="nn_hepdata_like" class="doc_header"><code>nn_hepdata_like</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L217" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_hepdata_like</code>(<strong><code>histogram_maker</code></strong>)</p>
+<h4 id="nn_hepdata_like" class="doc_header"><code>nn_hepdata_like</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L321" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_hepdata_like</code>(<strong><code>histogram_maker</code></strong>)</p>
 </blockquote>
 <p>Returns a function that constructs a typical 'hepdata-like' statistical model
 with signal, background, and background uncertainty yields when evaluated at
@@ -571,7 +629,7 @@ the parameters of the observable.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="nn_histosys" class="doc_header"><code>nn_histosys</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L248" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_histosys</code>(<strong><code>histogram_maker</code></strong>)</p>
+<h4 id="nn_histosys" class="doc_header"><code>nn_histosys</code><a href="https://github.com/phinate/neos/tree/master/neos/makers.py#L352" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>nn_histosys</code>(<strong><code>histogram_maker</code></strong>)</p>
 </blockquote>
 <p>Returns a function that constructs a HEP statistical model using a 'histosys'
 uncertainty for the background (nominal background, up and down systematic variations)
@@ -609,19 +667,16 @@ when evaluated at the parameters of the observable.</p>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">init_random_params</span><span class="p">,</span> <span class="n">predict</span> <span class="o">=</span> <span class="n">stax</span><span class="o">.</span><span class="n">serial</span><span class="p">(</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="c1"># One node for regression</span>
-    <span class="n">stax</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>
+    <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">100</span><span class="p">),</span> <span class="n">stax</span><span class="o">.</span><span class="n">Relu</span><span class="p">,</span> <span class="n">stax</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">stax</span><span class="o">.</span><span class="n">Sigmoid</span><span class="p">,</span>  <span class="c1"># One node for regression</span>
 <span class="p">)</span>
 
 <span class="c1"># need to pre-specify binning: use 0-1 range from sigmoid</span>
 <span class="c1"># NB: should work with relu etc too, just have to make a binning choice</span>
-<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
-<span class="n">centers</span>   <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>  <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">/</span><span class="mf">2.</span> <span class="c1"># for plotting</span>
+<span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">centers</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>  <span class="c1"># for plotting</span>
 
 <span class="c1"># pick a bandwidth</span>
-<span class="n">bin_width</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">bin_width</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bins</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
 <span class="n">bandwidth</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">bin_width</span>
 
 <span class="n">hist_maker</span> <span class="o">=</span> <span class="n">kde_bins_from_nn_histosys</span><span class="p">(</span><span class="n">predict</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">bandwidth</span><span class="p">)</span>
