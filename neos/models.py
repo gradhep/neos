@@ -3,9 +3,10 @@
 __all__ = ['Model', 'hepdata_like']
 
 # Cell
-import pyhf
 import jax
 from jax.config import config
+
+import pyhf
 
 # avoid those precision errors!
 config.update("jax_enable_x64", True)
@@ -48,7 +49,7 @@ class Model(object):
         main = pyhf.probability.Poisson(main).log_prob(maindata)
         constraint = pyhf.probability.Poisson(gamma * self.factor).log_prob(auxdata)
         # sum log probs over bins
-        return jax.numpy.asarray([jax.numpy.sum(main + constraint,axis=0)])
+        return jax.numpy.asarray([jax.numpy.sum(main + constraint, axis=0)])
 
 
 def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):

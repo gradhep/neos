@@ -7,21 +7,22 @@ import jax
 import jax.numpy as jnp
 from jax import config
 from jax.experimental import stax
+
 import pyhf
+from .fit import get_solvers
+from .models import *
+from .transforms import *
 
 # avoid those precision errors!
 config.update("jax_enable_x64", True)
 
 pyhf.set_backend(pyhf.tensor.jax_backend())
 
-from .fit import get_solvers
-from .transforms import *
-from .models import *
-
 # Cell
 
+
 def cls_maker(nn_model_maker, solver_kwargs):
-    '''
+    """
     Wraps the construction of the `cls_jax` method.
 
     Args:
@@ -31,14 +32,15 @@ def cls_maker(nn_model_maker, solver_kwargs):
             cls_jax: A callable function that takes the parameters of the observable as argument,
             and returns an expected CLs value from testing the background-only model against the
             nominal signal hypothesis (or whatever the value of 'test_mu' is)
-    '''
+    """
+
     @jax.jit
     def cls_jax(nn_params, test_mu):
         g_fitter, c_fitter = get_solvers(nn_model_maker, **solver_kwargs)
 
         m, bonlypars = nn_model_maker(nn_params)
         exp_data = m.expected_data(bonlypars)
-        #print(f'exp_data: {exp_data}')
+        # print(f'exp_data: {exp_data}')
         bounds = m.config.suggested_bounds()
 
         # map these
@@ -49,7 +51,7 @@ def cls_maker(nn_model_maker, solver_kwargs):
 
         # the constrained fit
 
-        #print('fitting constrained with init val %s setup %s', initval,[test_mu, nn_params])
+        # print('fitting constrained with init val %s setup %s', initval,[test_mu, nn_params])
 
         numerator = (
             to_bounded_vec(c_fitter(initval, [test_mu, nn_params]), bounds)
@@ -70,9 +72,7 @@ def cls_maker(nn_model_maker, solver_kwargs):
 
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
         muhat = denominator[0]
-        sqrtqmu = jnp.sqrt(
-            jnp.where(muhat < test_mu, profile_likelihood, 0.0)
-        )
+        sqrtqmu = jnp.sqrt(jnp.where(muhat < test_mu, profile_likelihood, 0.0))
         # print(f"sqrt(q(mu)): {sqrtqmu}")
         # compute CLs
         nullval = sqrtqmu
@@ -86,15 +86,16 @@ def cls_maker(nn_model_maker, solver_kwargs):
 
 # Cell
 
+
 def pyhf_cls_maker(nn_model_maker, solver_kwargs):
-#     @jax.jit
+    #     @jax.jit
     def cls_jax(nn_params, test_mu):
         g_fitter, c_fitter = get_solvers(nn_model_maker, **solver_kwargs)
 
         m, bonlypars = nn_model_maker(nn_params)
         exp_data = m.expected_data(bonlypars)
-        #print(f'exp_data: {exp_data}')
-#         bounds = m.config.suggested_bounds()[0]
+        # print(f'exp_data: {exp_data}')
+        #         bounds = m.config.suggested_bounds()[0]
 
         names = m.config.par_order
         bounds = m.config.suggested_bounds()
@@ -107,7 +108,7 @@ def pyhf_cls_maker(nn_model_maker, solver_kwargs):
 
         # the constrained fit
 
-        #print('fitting constrained with init val %s setup %s', initval,[test_mu, nn_params])
+        # print('fitting constrained with init val %s setup %s', initval,[test_mu, nn_params])
 
         numerator = (
             to_bounded_vec(c_fitter(initval, [test_mu, nn_params]), bounds)
@@ -127,9 +128,7 @@ def pyhf_cls_maker(nn_model_maker, solver_kwargs):
 
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
         muhat = denominator[0]
-        sqrtqmu = jnp.sqrt(
-            jnp.where(muhat < test_mu, profile_likelihood, 0.0)
-        )
+        sqrtqmu = jnp.sqrt(jnp.where(muhat < test_mu, profile_likelihood, 0.0))
         # print(f"sqrt(q(mu)): {sqrtqmu}")
         # compute CLs
         nullval = sqrtqmu
