@@ -12,7 +12,7 @@ def hists_from_nn(
     data_generator,  
     predict,
     example,
-    method='kde',
+    method='softmax',
     LUMI=10,
     sig_scale=2,
     bkg_scale=10):
@@ -23,18 +23,21 @@ def hists_from_nn(
         Args:
                 data_generator: Callable that returns generated data (in jax array format).
 
-                predict: Decision function for a parameterized observable. Assumed softmax here.
+                predict: Decision function for a parameterized observable, e.g. neural network.
 
                 example: A string to specify which example to test. Either 'three_blobs' or 'histosys'.
 
+                method: A string to specify the method to use for constructing soft histograms. Either 'softmax'
+                or 'kde'.
+
         Returns:
-                hist_maker: A callable function that takes the parameters of the observable,
+                hist_maker: A callable function that takes the parameters of the observable (and optional hyperpars),
                 then constructs signal, background, and background uncertainty yields.
         """
         
         if example == 'three_blobs':
             if method == 'softmax':
-                def hist_maker(nn):
+                def hist_maker(hm_params):
                     '''
                     Uses the nn decision function `predict` to form histograms from signal and background
                     data, all drawn from multivariate normal distributions with different means. Two
@@ -46,9 +49,11 @@ def hists_from_nn(
                     background histogram is then the mean of the resulting counts of the two modes, and 
                     the uncertainty can be quantified through the count standard deviation.
 
-                    Arguments:
-                        nn: jax array of observable parameters.
+                    Arguments: 
+                        hm_params: a list containing:
+                            nn: jax array of observable parameters.
                     '''
+                    nn, _ = hm_params
                     s, b_up, b_down = data_generator()
                     NMC = len(s)
                     s_hist = predict(nn, s).sum(axis=0) * sig_scale / NMC * LUMI
@@ -64,7 +69,7 @@ def hists_from_nn(
                     return s_hist, b_mean, b_unc
                 
             elif method == 'kde':
-                def hist_maker(nn,bins,bandwidth):
+                def hist_maker(hm_params):
                     '''
                     Uses the nn decision function `predict` to form histograms from signal and background
                     data using a kde, all drawn from multivariate normal distributions with different means. Two
@@ -77,36 +82,49 @@ def hists_from_nn(
                     the uncertainty can be quantified through the count standard deviation.
 
                     Arguments:
-                        nn: jax array of observable parameters.
-                        
-                        bins: Array of bin edges, e.g. np.linspace(0,1,3) defines a two-bin histogram with
-                            edges at 0, 0.5, 1.
+                        hm_params: Array-like, consisting of:
+                            nn: jax array of observable parameters.
+                            
+                            bins: Array of bin edges, e.g. np.linspace(0,1,3) defines a two-bin histogram with
+                                edges at 0, 0.5, 1.
 
-                        bandwidth: Float that controls the 'smoothness' of the kde. It's recommended to keep
-                        this fairly similar to the bin width to avoid oversmoothing the distribution. Going too low
-                        will cause things to break, as the gradients of the kde become unstable.
+                            bandwidth: Float that controls the 'smoothness' of the kde. It's recommended to keep
+                            this fairly similar to the bin width to avoid oversmoothing the distribution. Going too low
+                            will cause things to break, as the gradients of the kde become unstable.
 
                     '''
+                    nn, hpar_dict = hm_params
+                    bins, bandwidth = hpar_dict['bins'], hpar_dict['bandwidth']
                     s, b_up, b_down = data_generator()
                     NMC = len(s)
-                    s_hist = predict(nn, s).sum(axis=0) * sig_scale / NMC * LUMI
+                    
+                    nn_s, nn_b_up, nn_b_down = (
+                        predict(nn, s).ravel(),
+                        predict(nn, b_up).ravel(),
+                        predict(nn, b_down).ravel(),
+                    )
+                        
+                    s_hist = hist(nn_s, bins, bandwidth) * sig_scale / NMC * LUMI
 
-                    b_hists = [
-                        predict(nn, b_up).sum(axis=0) * bkg_scale / NMC * LUMI,
-                        predict(nn, b_down).sum(axis=0) * bkg_scale / NMC * LUMI
+                    b_hists = jnp.asarray([
+                        hist(nn_b_up, bins, bandwidth) * bkg_scale / NMC * LUMI,
+                        hist(nn_b_down, bins, bandwidth) * bkg_scale / NMC * LUMI,
+                    ])
+
+                    kde_counts = [
+                        s_hist,
+                        jnp.mean(b_hists, axis=0),
+                        jnp.std(b_hists, axis=0)
                     ]
-
-                    b_mean = jnp.mean(jnp.asarray(b_hists), axis=0)
-                    b_unc = jnp.std(jnp.asarray(b_hists), axis=0)
-
-                    return s_hist, b_mean, b_unc
+                    
+                    return kde_counts
 
             else:
                 assert False, f'Unknown soft histogram method \'{method}\'. Currently only \'softmax\' or \'kde\' are available.'
 
         elif example == 'histosys':
             if method == 'softmax':
-                def hist_maker(nn):
+                def hist_maker(hm_params):
                     '''
                     Uses the nn decision function `predict` to form histograms from signal and background
                     data, all drawn from multivariate normal distributions with different means. Three
@@ -119,11 +137,13 @@ def hists_from_nn(
                     interpolating between them using pyhf.
 
                     Arguments:
-                        nn: jax array of observable parameters.
+                        hm_params: a list containing:
+                            nn: jax array of observable parameters.
 
                     Returns:
                         Set of 4 counts for signal, background, and up/down modes.
                     '''
+                    nn, _ = hm_params 
                     s, b_nom, b_up, b_down = data_generator()
                     NMC = len(s)
                     counts = jnp.asarray(
@@ -138,7 +158,7 @@ def hists_from_nn(
                     return counts
 
             elif method == 'kde':
-                def hist_maker(nn, bins, bandwidth):
+                def hist_maker(hm_params):
                     '''
                     Uses the nn decision function `predict` to form histograms from signal and background
                     data, all drawn from multivariate normal distributions with different means. Three
@@ -151,19 +171,21 @@ def hists_from_nn(
                     interpolating between them using pyhf.
 
                     Arguments:
-                        nn: jax array of observable parameters.
-                        
-                        bins: Array of bin edges, e.g. np.linspace(0,1,3) defines a two-bin histogram with
-                            edges at 0, 0.5, 1.
+                        hm_params: Array-like, consisting of:
+                            nn: jax array of observable parameters.
+                            
+                            bins: Array of bin edges, e.g. np.linspace(0,1,3) defines a two-bin histogram with
+                                edges at 0, 0.5, 1.
 
-                        bandwidth: Float that controls the 'smoothness' of the kde. It's recommended to keep
-                        this fairly similar to the bin width to avoid oversmoothing the distribution. Going too low
-                        will cause things to break, as the gradients of the kde become unstable.
+                            bandwidth: Float that controls the 'smoothness' of the kde. It's recommended to keep
+                            this fairly similar to the bin width to avoid oversmoothing the distribution. Going too low
+                            will cause things to break, as the gradients of the kde become unstable.
 
                     Returns:
                         Set of 4 counts for signal, background, and up/down modes.
                     '''
-            
+                    nn, hpar_dict = hm_params
+                    bins, bandwidth = hpar_dict['bins'], hpar_dict['bandwidth']
                     s, b_nom, b_up, b_down = data_generator()
                     NMC = len(s)
                     
@@ -667,17 +689,15 @@ def nn_hepdata_like(histogram_maker):
             `neos.models` or from `pyhf`) when evaluated at the observable's parameters,
             along with the background-only parameters for use in downstream inference.
     """
-    hm = histogram_maker()
-
     def nn_model_maker(hm_params):
-        s, b, db = hm(*hm_params)
+        s, b, db = histogram_maker(hm_params)
+        print(s, b, db)
         m = hepdata_like(s, b, db)  # neos 'pyhf' model
         nompars = m.config.suggested_init()
         bonlypars = jnp.asarray([x for x in nompars])
         bonlypars = jax.ops.index_update(bonlypars, m.config.poi_index, 0.0)
         return m, bonlypars
 
-    nn_model_maker.hm = hm
     return nn_model_maker
 
 
@@ -696,8 +716,6 @@ def nn_histosys(histogram_maker):
             `neos.models` or from `pyhf`) when evaluated at the observable's parameters,
             along with the background-only parameters for use in downstream inference.
     """
-    hm = histogram_maker()
-
     def from_spec(yields):
 
         s, b, bup, bdown = yields
@@ -733,12 +751,11 @@ def nn_histosys(histogram_maker):
         return pyhf.Model(spec)
 
     def nn_model_maker(hm_params):
-        yields = hm(*hm_params)
+        yields = histogram_maker(hm_params)
         m = from_spec(yields)
         nompars = m.config.suggested_init()
         bonlypars = jnp.asarray([x for x in nompars])
         bonlypars = jax.ops.index_update(bonlypars, m.config.poi_index, 0.0)
         return m, bonlypars
 
-    nn_model_maker.hm = hm
     return nn_model_maker

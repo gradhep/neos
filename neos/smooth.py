@@ -1,8 +1,10 @@
 __all__ = ["kde_hist", "cut"]
 
+import jax
 import jax.numpy as jnp
 import jax.scipy as jsc
 
+@jax.jit
 def kde_hist(events, bins, bandwidth=None, density=False):
     """
     Args:
@@ -18,7 +20,7 @@ def kde_hist(events, bins, bandwidth=None, density=False):
     Returns:
             binned counts, calculated by kde!
     """
-    bandwidth = bandwidth or events.shape[-1]**-.25 # Scott's rule
+    # bandwidth = bandwidth or events.shape[-1]**-.25 # Scott's rule
 
     edge_hi = bins[1:] # ending bin edges ||<-
     edge_lo = bins[:-1] # starting bin edges ->||

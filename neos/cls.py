@@ -23,7 +23,7 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
     """
 
     @jax.jit
-    def get_expected_CLs(test_mu, params, hyperparams=[None], return_pvalue=False):
+    def get_expected_CLs(test_mu, params, hyperparams=None, return_pvalue=False):
         '''
         A callable function that takes the parameters of the observable as argument,
         and returns an expected CLs (or p-value if you set `return_pvalue`=True) from testing the background-only 
@@ -32,7 +32,7 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
         #g_fitter = global_fit(model_maker, **solver_kwargs)
         c_fitter = constrained_fit(model_maker, **solver_kwargs)
 
-        m, bonlypars = model_maker([params,*hyperparams])
+        m, bonlypars = model_maker([params,hyperparams])
         exp_data = m.expected_data(bonlypars)
         bounds = m.config.suggested_bounds()
 
@@ -44,9 +44,9 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
 
         # the constrained fit
         numerator = (
-            to_bounded_vec(c_fitter(initval, [params, test_mu]), bounds)
+            to_bounded_vec(c_fitter(initval, [[params,hyperparams], test_mu]), bounds)
             if transforms
-            else c_fitter(initval, [params, test_mu])
+            else c_fitter(initval, [[params,hyperparams], test_mu])
         )
 
         # don't have to fit these -- we know them for expected limits!
