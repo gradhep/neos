@@ -38,9 +38,6 @@ def global_fit(
         m, bonlypars = model_constructor(model_pars)
 
         bounds = m.config.suggested_bounds()
-        constrained_mu = (
-            to_inf(constrained_mu, bounds[0]) if pdf_transform else constrained_mu
-        )
 
         exp_bonly_data = m.expected_data(bonlypars, include_auxdata=True)
 

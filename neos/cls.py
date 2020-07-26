@@ -5,10 +5,10 @@ import jax.numpy as jnp
 import pyhf
 from functools import partial
 
-pyhf.set_backend(pyhf.tensor.jax_backend())
+pyhf.set_backend('jax')
 
 from .fit import global_fit, constrained_fit
-from .transforms import *
+from .transforms import to_bounded_vec, to_inf_vec
 
 
 def expected_CLs_upper_limit(model_maker, solver_kwargs):
@@ -23,16 +23,16 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
     """
 
     @jax.jit
-    def get_expected_CLs(test_mu, params, pvalue=False):
+    def get_expected_CLs(test_mu, params, hyperparams=[None], return_pvalue=False):
         '''
         A callable function that takes the parameters of the observable as argument,
-        and returns an expected CLs (or p-value if you) from testing the background-only model against the
-        nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
+        and returns an expected CLs (or p-value if you set `return_pvalue`=True) from testing the background-only 
+        model against the nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
         '''
-        g_fitter = global_fit(model_maker, **solver_kwargs)
+        #g_fitter = global_fit(model_maker, **solver_kwargs)
         c_fitter = constrained_fit(model_maker, **solver_kwargs)
 
-        m, bonlypars = model_maker(params)
+        m, bonlypars = model_maker([params,*hyperparams])
         exp_data = m.expected_data(bonlypars)
         bounds = m.config.suggested_bounds()
 
@@ -63,11 +63,11 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
         sqrtqmu = jnp.sqrt(jnp.where(muhat < test_mu, profile_likelihood, 0.0))
         CLsb =  1 - pyhf.tensorlib.normal_cdf(sqrtqmu)
         
-        if not pvalue:
+        if not return_pvalue:
             altval = 0
             CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
             return CLsb / CLb
           
         return CLsb
 
-    return expected_CLs
+    return get_expected_CLs

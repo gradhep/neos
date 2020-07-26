@@ -12,11 +12,11 @@ class _Config(object):
         self.npars = 2
 
     def suggested_init(self):
-        return jax.numpy.asarray([1.0, 1.0])
+        return jnp.asarray([1.0, 1.0])
 
     def suggested_bounds(self):
-        return jax.numpy.asarray(
-            [jax.numpy.asarray([0.0, 10.0]), jax.numpy.asarray([0.0, 10.0])]
+        return jnp.asarray(
+            [jnp.asarray([0.0, 10.0]), jnp.asarray([0.0, 10.0])]
         )
 
 
@@ -29,9 +29,9 @@ class Model(object):
 
     def expected_data(self, pars, include_auxdata=True):
         mu, gamma = pars
-        expected_main = jax.numpy.asarray([gamma * self.nominal + mu * self.sig])
-        aux_data = jax.numpy.asarray([self.aux])
-        return jax.numpy.concatenate([expected_main, aux_data])
+        expected_main = jnp.asarray([gamma * self.nominal + mu * self.sig])
+        aux_data = jnp.asarray([self.aux])
+        return jnp.concatenate([expected_main, aux_data])
 
     def logpdf(self, pars, data):
         maindata, auxdata = data
@@ -40,7 +40,7 @@ class Model(object):
         main = pyhf.probability.Poisson(main).log_prob(maindata)
         constraint = pyhf.probability.Poisson(gamma * self.factor).log_prob(auxdata)
         # sum log probs over bins
-        return jax.numpy.asarray([jax.numpy.sum(main + constraint, axis=0)])
+        return jnp.asarray([jnp.sum(main + constraint, axis=0)])
 
 
 def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
@@ -53,8 +53,8 @@ def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
 # _Config = namedtuple("_Config", ["poi_index","npars","suggested_init","suggested_bounds"])
 
 # def init_config():
-#     return _Config(0,2,jax.numpy.asarray([1.0, 1.0]),jax.numpy.asarray(
-#             [jax.numpy.asarray([0.0, 10.0]), jax.numpy.asarray([0.0, 10.0])]
+#     return _Config(0,2,jnp.asarray([1.0, 1.0]),jnp.asarray(
+#             [jnp.asarray([0.0, 10.0]), jnp.asarray([0.0, 10.0])]
 #         ))
 
 # Model = namedtuple("Model", ["sig", "nominal", "uncert", "factor", "aux", "config"])
@@ -68,9 +68,9 @@ def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
 
 # def expected_data(model, pars, include_auxdata=True):
 #     mu, gamma = pars
-#     expected_main = jax.numpy.asarray([gamma * model.nominal + mu * model.sig])
-#     aux_data = jax.numpy.asarray([model.aux])
-#     return jax.numpy.concatenate([expected_main, aux_data])
+#     expected_main = jnp.asarray([gamma * model.nominal + mu * model.sig])
+#     aux_data = jnp.asarray([model.aux])
+#     return jnp.concatenate([expected_main, aux_data])
 
 # @jax.jit
 # def logpdf(model, pars, data):
@@ -80,7 +80,7 @@ def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
 #     main = pyhf.probability.Poisson(main).log_prob(maindata)
 #     constraint = pyhf.probability.Poisson(gamma * model.factor).log_prob(auxdata)
 #     # sum log probs over bins
-#     return jax.numpy.asarray([jax.numpy.sum(main + constraint,axis=0)])
+#     return jnp.asarray([jnp.sum(main + constraint,axis=0)])
 
 
 # def hepdata_like(signal_data, bkg_data, bkg_uncerts, batch_size=None):
