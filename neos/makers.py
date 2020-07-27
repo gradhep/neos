@@ -11,7 +11,6 @@ from .smooth import kde_hist as hist
 def hists_from_nn(
     data_generator,  
     predict,
-    example,
     method='softmax',
     LUMI=10,
     sig_scale=2,
@@ -25,17 +24,21 @@ def hists_from_nn(
 
                 predict: Decision function for a parameterized observable, e.g. neural network.
 
-                example: A string to specify which example to test. Either 'three_blobs' or 'histosys'.
-
                 method: A string to specify the method to use for constructing soft histograms. Either 'softmax'
                 or 'kde'.
+
+                LUMI: 'Luminosity' scaling factor for the yields.
+
+                sig_scale: Individual scaling factor for the signal yields.
+
+                bkg_scale: Individual scaling factor for the signal yields.
 
         Returns:
                 hist_maker: A callable function that takes the parameters of the observable (and optional hyperpars),
                 then constructs signal, background, and background uncertainty yields.
         """
-        
-        if example == 'three_blobs':
+        data = data_generator()
+        if len(data) == 3:
             if method == 'softmax':
                 def hist_maker(hm_params):
                     '''
@@ -54,7 +57,7 @@ def hists_from_nn(
                             nn: jax array of observable parameters.
                     '''
                     nn, _ = hm_params
-                    s, b_up, b_down = data_generator()
+                    s, b_up, b_down = data
                     NMC = len(s)
                     s_hist = predict(nn, s).sum(axis=0) * sig_scale / NMC * LUMI
 
@@ -95,7 +98,7 @@ def hists_from_nn(
                     '''
                     nn, hpar_dict = hm_params
                     bins, bandwidth = hpar_dict['bins'], hpar_dict['bandwidth']
-                    s, b_up, b_down = data_generator()
+                    s, b_up, b_down = data
                     NMC = len(s)
                     
                     nn_s, nn_b_up, nn_b_down = (
@@ -122,7 +125,7 @@ def hists_from_nn(
             else:
                 assert False, f'Unknown soft histogram method \'{method}\'. Currently only \'softmax\' or \'kde\' are available.'
 
-        elif example == 'histosys':
+        elif len(data) == 4:
             if method == 'softmax':
                 def hist_maker(hm_params):
                     '''
@@ -144,7 +147,7 @@ def hists_from_nn(
                         Set of 4 counts for signal, background, and up/down modes.
                     '''
                     nn, _ = hm_params 
-                    s, b_nom, b_up, b_down = data_generator()
+                    s, b_nom, b_up, b_down = data
                     NMC = len(s)
                     counts = jnp.asarray(
                         [
@@ -186,7 +189,7 @@ def hists_from_nn(
                     '''
                     nn, hpar_dict = hm_params
                     bins, bandwidth = hpar_dict['bins'], hpar_dict['bandwidth']
-                    s, b_nom, b_up, b_down = data_generator()
+                    s, b_nom, b_up, b_down = data
                     NMC = len(s)
                     
                     nn_s, nn_b_nom, nn_b_up, nn_b_down = (
@@ -208,7 +211,7 @@ def hists_from_nn(
                 assert False, f'Unknown soft histogram method \'{method}\'. Currently only \'softmax\' or \'kde\' are available.'
 
         else:
-            assert False, f'Unknown example \'{example}\'. Currently only \'three_blobs\' or \'histosys\' are available.'
+            assert False, f'Unknown blob size (only using 3 or 4 blobs for this example).'
                 
         return hist_maker
 

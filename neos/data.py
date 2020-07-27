@@ -1,28 +1,31 @@
-__all__ = ['blobs']
+__all__ = ['generate_blobs']
 
 import jax
 import jax.numpy as jnp
 
-def blobs(rng, example, NMC=500, sig_mean = jnp.asarray([-1, 1]), bup_mean=jnp.asarray([2.5, 2]), b_mean=jnp.asarray([1, -1]), bdown_mean=jnp.asarray([-2.5, -1.5])):
+def generate_blobs(rng, blobs, NMC=500, sig_mean = jnp.asarray([-1, 1]), bup_mean=jnp.asarray([2.5, 2]), bdown_mean=jnp.asarray([-2.5, -1.5]), b_mean=jnp.asarray([1, -1])):
     '''
-    Two background distributions are sampled from, which is meant to mimic the situation in
-    particle physics where one has a 'nominal' prediction for a nuisance parameter and then
-    an alternate value (e.g. from varying up/down by one standard deviation), which then
-    modifies the background pdf. Here, we take that effect to be a shift of the mean of the
-    distribution. The value for the background histogram is then the mean of the resulting
-    counts of the two modes, and the uncertainty can be quantified through the count
-    standard deviation.
+    Function that returns a callable to generate a set of 2D normally distributed blobs, corresponding to signal, background, and background uncertainty modes.
+
+    Args:
+        rng: jax PRNG key (random seed).
+        blobs: Number of blobs to generate (3 or 4).
+        NMC: Number of 'monte carlo' samples to generate.
+        sig_mean: jax array of the mean of the signal distribution.
+        bup_mean: jax array of the mean of the 'up' background distribution.
+        bdown_mean: jax array of the mean of the 'up' background distribution.
+        b_mean: jax array of the mean of the nominal background distribution.
     '''
-    if example == 'three_blobs':
-        def generate_blobs():
+    if blobs == 3:
+        def gen_blobs():
             sig = jax.random.multivariate_normal(rng, sig_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
             bkg_up = jax.random.multivariate_normal(rng, bup_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
             bkg_down = jax.random.multivariate_normal(rng, bdown_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
 
             return sig, bkg_up, bkg_down
 
-    elif example == 'histosys':
-        def generate_blobs():
+    elif blobs == 4:
+        def gen_blobs():
             sig = jax.random.multivariate_normal(rng, sig_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
             bkg_up = jax.random.multivariate_normal(rng, bup_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
             bkg_down = jax.random.multivariate_normal(rng, bdown_mean, jnp.asarray([[1, 0], [0, 1]]), shape=(NMC,))
@@ -31,6 +34,6 @@ def blobs(rng, example, NMC=500, sig_mean = jnp.asarray([-1, 1]), bup_mean=jnp.a
             return sig, bkg_nom, bkg_up, bkg_down
 
     else:
-        assert False, f'Unknown example \'{example}\'. Currently only \'three_blobs\' or \'histosys\' are available.'
+        assert False, f'Unsupported number of blobs: {blobs} (only using 3 or 4 blobs for these examples).'
         
-    return generate_blobs
+    return gen_blobs
