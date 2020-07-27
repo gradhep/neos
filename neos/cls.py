@@ -14,20 +14,30 @@ from .transforms import to_bounded_vec, to_inf_vec
 def expected_CLs_upper_limit(model_maker, solver_kwargs):
     """
     Args:
-            model_maker: Function that returns a Model object using the `params` arg.
+        model_maker: Function that returns a Model object using the `params` arg.
 
     Returns:
-            get_expected_CLs: A callable function that takes the parameters of the observable as argument,
-            and returns an expected p-value from testing the background-only model against the
-            nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
+        get_expected_CLs: A callable function that takes the parameters of the observable as argument,
+        and returns an expected p-value from testing the background-only model against the
+        nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
     """
 
     @jax.jit
-    def get_expected_CLs(test_mu, params, hyperparams=None, return_pvalue=False):
+    def get_expected_CLs(test_mu, params, hyperparams=None, pvalues = ['CLs']):
         '''
         A callable function that takes the parameters of the observable as argument,
         and returns an expected CLs (or p-value if you set `return_pvalue`=True) from testing the background-only 
         model against the nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
+
+        Args:
+            test_mu: a float for the value of mu to test against.
+
+            params: jax array of the parameters of the observable.
+
+            hyperparams: dict of hyperparameters for the model construction, e.g. bandwidth & binning for kde histograms.
+
+            pvalues: list of strings corresponding to the pvalues that should be returned. Defaults to CL_s.
+
         '''
         #g_fitter = global_fit(model_maker, **solver_kwargs)
         c_fitter = constrained_fit(model_maker, **solver_kwargs)
@@ -62,12 +72,11 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
         muhat = denominator[0]
         sqrtqmu = jnp.sqrt(jnp.where(muhat < test_mu, profile_likelihood, 0.0))
         CLsb =  1 - pyhf.tensorlib.normal_cdf(sqrtqmu)
+        altval = 0
+        CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
+        CLs = CLsb/CLb
         
-        if not return_pvalue:
-            altval = 0
-            CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
-            return CLsb / CLb
-          
-        return CLsb
+        pdict = dict(CLs=CLs,p_sb=CLsb,p_b=CLb)
+        return (pdict[key] for key in pvalues)
 
     return get_expected_CLs

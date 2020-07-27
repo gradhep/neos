@@ -149,14 +149,12 @@ def hists_from_nn(
                     nn, _ = hm_params 
                     s, b_nom, b_up, b_down = data
                     NMC = len(s)
-                    counts = jnp.asarray(
-                        [
+                    counts = [
                             predict(nn, s).sum(axis=0)* sig_scale / NMC * LUMI,
                             predict(nn, b_nom).sum(axis=0)* bkg_scale / NMC * LUMI,
                             predict(nn, b_up).sum(axis=0)* bkg_scale / NMC * LUMI,
                             predict(nn, b_down).sum(axis=0)* bkg_scale / NMC * LUMI
-                        ]
-                    )
+                    ]
 
                     return counts
 
@@ -199,12 +197,12 @@ def hists_from_nn(
                         predict(nn, b_down).ravel(),
                     )
                         
-                    kde_counts = jax.numpy.asarray([
+                    kde_counts = [
                         hist(nn_s, bins, bandwidth) * sig_scale / NMC * LUMI,
                         hist(nn_b_nom, bins, bandwidth) * bkg_scale / NMC * LUMI,
                         hist(nn_b_up, bins, bandwidth) * bkg_scale / NMC * LUMI,
                         hist(nn_b_down, bins, bandwidth) * bkg_scale / NMC * LUMI,
-                    ])
+                    ]
                     
                     return kde_counts
             else:
@@ -694,7 +692,6 @@ def nn_hepdata_like(histogram_maker):
     """
     def nn_model_maker(hm_params):
         s, b, db = histogram_maker(hm_params)
-        print(s, b, db)
         m = hepdata_like(s, b, db)  # neos 'pyhf' model
         nompars = m.config.suggested_init()
         bonlypars = jnp.asarray([x for x in nompars])
@@ -755,6 +752,7 @@ def nn_histosys(histogram_maker):
 
     def nn_model_maker(hm_params):
         yields = histogram_maker(hm_params)
+        print(yields,len(yields))
         m = from_spec(yields)
         nompars = m.config.suggested_init()
         bonlypars = jnp.asarray([x for x in nompars])
