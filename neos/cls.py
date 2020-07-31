@@ -6,6 +6,8 @@ import pyhf
 from functools import partial
 
 pyhf.set_backend('jax')
+# avoid those precision errors!
+jax.config.update("jax_enable_x64", True)
 
 from .fit import global_fit, constrained_fit
 from .transforms import to_bounded_vec, to_inf_vec
@@ -77,6 +79,6 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
         CLs = CLsb/CLb
         
         pdict = dict(CLs=CLs,p_sb=CLsb,p_b=CLb)
-        return (pdict[key] for key in pvalues)
+        return [pdict[key] for key in pvalues]
 
     return get_expected_CLs
