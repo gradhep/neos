@@ -5,7 +5,7 @@ __all__ = ['get_solvers']
 # Cell
 import jax
 from fax.implicit import twophase
-import jax.experimental.optimizers as optimizers
+from jax.experimental import optix
 
 from .transforms import to_bounded_vec, to_inf_vec, to_bounded, to_inf
 from .models import *
@@ -21,7 +21,7 @@ def get_solvers(
 ):
     '''
     Wraps a series of functions that perform maximum likelihood fitting in the
-    `two_phase_solver` method found in the `fax` python module. This allows for
+    `two_phase_solve` method found in the `fax` python module. This allows for
     the calculation of gradients of the best-fit parameters with respect to upstream
     parameters that control the underlying model, i.e. the event yields (which are
     then parameterized by weights or similar).
@@ -34,7 +34,7 @@ def get_solvers(
             respectively. Differentiable :)
     '''
 
-    adam_init, adam_update, adam_get_params  = optimizers.adam(1e-6)
+    gradient_descent = optix.scale(-1e-2)
 
     def make_model(hyper_pars):
         constrained_mu, nn_pars = hyper_pars[0], hyper_pars[1]
@@ -68,50 +68,57 @@ def get_solvers(
             )
             return -expected_logpdf(pars)[0]
 
-        return constrained_mu, global_fit_objective, constrained_fit_objective,bounds
+        return constrained_mu, global_fit_objective, constrained_fit_objective, bounds
 
     def global_bestfit_minimized(hyper_param):
         _, nll, _ ,_ = make_model(hyper_param)
 
-        def bestfit_via_grad_descent(i, param):  # gradient descent
+        def bestfit_via_grad_descent(param):  # gradient descent
             g = jax.grad(nll)(param)
-            # param = param - g * learning_rate
-            param = adam_get_params(adam_update(i,g,adam_init(param)))
-            return param
+            updates, _ = gradient_descent.update(g, gradient_descent.init(param))
+            return optix.apply_updates(param, updates)
 
         return bestfit_via_grad_descent
 
-    def constrained_bestfit_minimized(hyper_param):
-        mu, nll, cnll,bounds = make_model(hyper_param)
 
-        def bestfit_via_grad_descent(i, param):  # gradient descent
+    def constrained_bestfit_minimized(hyper_param):
+        mu, nll, cnll, bounds = make_model(hyper_param)
+
+        def bestfit_via_grad_descent(param):  # gradient descent
             _, np = param[0], param[1:]
             g = jax.grad(cnll)(np)
-            np = adam_get_params(adam_update(i,g,adam_init(np)))
+            updates, _ = gradient_descent.update(g, gradient_descent.init(np))
+            np = optix.apply_updates(np, updates)
             param = jax.numpy.concatenate([jax.numpy.asarray([mu]), np])
             return param
 
+
         return bestfit_via_grad_descent
 
-    global_solve = twophase.two_phase_solver(
-        param_func=global_bestfit_minimized,
-        default_rtol=default_rtol,
-        default_atol=default_atol,
-        default_max_iter=default_max_iter
+    convergence_test = twophase.default_convergence_test(
+        rtol=default_rtol,
+        atol=default_atol,
     )
-    constrained_solver = twophase.two_phase_solver(
-        param_func=constrained_bestfit_minimized,
-        default_rtol=default_rtol,
-        default_atol=default_atol,
-        default_max_iter=default_max_iter,
+    global_solver = twophase.default_solver(
+        convergence_test=convergence_test,
+        max_iter=default_max_iter,
     )
+    constrained_solver = global_solver
 
     def g_fitter(init, hyper_pars):
-        solve = global_solve(init, hyper_pars)
-        return solve.value
+        return twophase.two_phase_solve(
+            global_bestfit_minimized,
+            init,
+            hyper_pars,
+            solvers=(global_solver,),
+        )
 
     def c_fitter(init, hyper_pars):
-        solve = constrained_solver(init, hyper_pars)
-        return solve.value
+        return twophase.two_phase_solve(
+            constrained_bestfit_minimized,
+            init,
+            hyper_pars,
+            solvers=(constrained_solver,),
+        )
 
     return g_fitter, c_fitter
