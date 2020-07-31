@@ -25,7 +25,7 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
     """
 
     @jax.jit
-    def get_expected_CLs(test_mu, params, hyperparams=None, pvalues = ['CLs']):
+    def get_expected_CLs(params, test_mu, hyperparams=None, pvalues = ['CLs']):
         '''
         A callable function that takes the parameters of the observable as argument,
         and returns an expected CLs (or p-value if you set `return_pvalue`=True) from testing the background-only 

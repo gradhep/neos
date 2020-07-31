@@ -1,4 +1,4 @@
-__all__ = ['hists_from_nn','nn_hepdata_like', 'nn_histosys']
+__all__ = ['hists_from_nn','hepdata_like_from_hists', 'histosys_model_from_hists']
 
 from functools import partial
 
@@ -231,7 +231,7 @@ pyhf.set_backend(jax_backend)
 from .models import hepdata_like
 
 
-def nn_hepdata_like(histogram_maker):
+def hepdata_like_from_hists(histogram_maker):
     """
     Returns a function that constructs a typical 'hepdata-like' statistical model
     with signal, background, and background uncertainty yields when evaluated at
@@ -257,7 +257,7 @@ def nn_hepdata_like(histogram_maker):
     return nn_model_maker
 
 
-def nn_histosys(histogram_maker):
+def histosys_model_from_hists(histogram_maker):
     """
     Returns a function that constructs a HEP statistical model using a 'histosys'
     uncertainty for the background (nominal background, up and down systematic variations)
