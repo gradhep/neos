@@ -9,6 +9,7 @@ import jax.experimental.optimizers as optimizers
 from .transforms import to_bounded_vec, to_inf_vec, to_bounded, to_inf
 
 
+@jax.jit
 def global_fit(
     model_constructor,
     pdf_transform=False,
@@ -17,12 +18,11 @@ def global_fit(
     default_max_iter=int(1e7),
     learning_rate=1e-6,
 ):
-    """
-    Wraps a series of functions that perform maximum likelihood fitting in the
-    `two_phase_solver` method found in the `fax` python module. This allows for
-    the calculation of gradients of the best-fit parameters with respect to upstream
-    parameters that control the underlying model, i.e. the event yields (which are
-    then parameterized by weights or similar).
+    """Wraps a series of functions that perform maximum likelihood fitting in
+    the `two_phase_solver` method found in the `fax` python module. This allows
+    for the calculation of gradients of the best-fit parameters with respect to
+    upstream parameters that control the underlying model, i.e. the event
+    yields (which are then parameterized by weights or similar).
 
     Args:
             model_constructor: Function that takes in the parameters of the observable,
@@ -79,6 +79,7 @@ def global_fit(
     return global_fitter
 
 
+@jax.jit
 def constrained_fit(
     model_constructor,
     pdf_transform=False,
@@ -87,12 +88,11 @@ def constrained_fit(
     default_max_iter=int(1e7),
     learning_rate=1e-6,
 ):
-    """
-    Wraps a series of functions that perform maximum likelihood fitting in the
-    `two_phase_solver` method found in the `fax` python module. This allows for
-    the calculation of gradients of the best-fit parameters with respect to upstream
-    parameters that control the underlying model, i.e. the event yields (which are
-    then parameterized by weights or similar).
+    """Wraps a series of functions that perform maximum likelihood fitting in
+    the `two_phase_solver` method found in the `fax` python module. This allows
+    for the calculation of gradients of the best-fit parameters with respect to
+    upstream parameters that control the underlying model, i.e. the event
+    yields (which are then parameterized by weights or similar).
 
     Args:
             model_constructor: Function that takes in the parameters of the observable,

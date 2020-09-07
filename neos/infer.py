@@ -1,11 +1,11 @@
-__all__ = ["expected_CLs_upper_limit"]
+__all__ = ["expected_CLs"]
 
 import jax
 import jax.numpy as jnp
 import pyhf
 from functools import partial
 
-pyhf.set_backend('jax')
+pyhf.set_backend("jax")
 # avoid those precision errors!
 jax.config.update("jax_enable_x64", True)
 
@@ -13,7 +13,7 @@ from .fit import global_fit, constrained_fit
 from .transforms import to_bounded_vec, to_inf_vec
 
 
-def expected_CLs_upper_limit(model_maker, solver_kwargs):
+def expected_CLs(model_maker, solver_kwargs):
     """
     Args:
         model_maker: Function that returns a Model object using the `params` arg.
@@ -25,11 +25,12 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
     """
 
     @jax.jit
-    def get_expected_CLs(params, test_mu, hyperparams=None, pvalues = ['CLs']):
-        '''
-        A callable function that takes the parameters of the observable as argument,
-        and returns an expected CLs (or p-value if you set `return_pvalue`=True) from testing the background-only 
-        model against the nominal signal hypothesis (or whatever corresponds to the value of the arg 'test_mu')
+    def get_expected_CLs(params, test_mu, hyperparams=None, pvalues=["CLs"]):
+        """A callable function that takes the parameters of the observable as
+        argument, and returns an expected CLs (or p-value if you set
+        `return_pvalue`=True) from testing the background-only model against
+        the nominal signal hypothesis (or whatever corresponds to the value of
+        the arg 'test_mu')
 
         Args:
             test_mu: a float for the value of mu to test against.
@@ -39,12 +40,11 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
             hyperparams: dict of hyperparameters for the model construction, e.g. bandwidth & binning for kde histograms.
 
             pvalues: list of strings corresponding to the pvalues that should be returned. Defaults to CL_s.
-
-        '''
-        #g_fitter = global_fit(model_maker, **solver_kwargs)
+        """
+        # g_fitter = global_fit(model_maker, **solver_kwargs)
         c_fitter = constrained_fit(model_maker, **solver_kwargs)
 
-        m, bonlypars = model_maker([params,hyperparams])
+        m, bonlypars = model_maker([params, hyperparams])
         exp_data = m.expected_data(bonlypars)
         bounds = m.config.suggested_bounds()
 
@@ -56,13 +56,13 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
 
         # the constrained fit
         numerator = (
-            to_bounded_vec(c_fitter(initval, [[params,hyperparams], test_mu]), bounds)
+            to_bounded_vec(c_fitter(initval, [[params, hyperparams], test_mu]), bounds)
             if transforms
-            else c_fitter(initval, [[params,hyperparams], test_mu])
+            else c_fitter(initval, [[params, hyperparams], test_mu])
         )
 
         # don't have to fit these -- we know them for expected limits!
-        denominator = bonlypars  
+        denominator = bonlypars
         # denominator = to_bounded_vec(g_fitter(initval, params), bounds) if transforms else g_fitter(initval, params)
 
         # compute test statistic (lambda(µ))
@@ -73,12 +73,12 @@ def expected_CLs_upper_limit(model_maker, solver_kwargs):
         # in exclusion fit zero out test stat if best fit µ^ is larger than test µ
         muhat = denominator[0]
         sqrtqmu = jnp.sqrt(jnp.where(muhat < test_mu, profile_likelihood, 0.0))
-        CLsb =  1 - pyhf.tensorlib.normal_cdf(sqrtqmu)
+        CLsb = 1 - pyhf.tensorlib.normal_cdf(sqrtqmu)
         altval = 0
         CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
-        CLs = CLsb/CLb
-        
-        pdict = dict(CLs=CLs,p_sb=CLsb,p_b=CLb)
+        CLs = CLsb / CLb
+
+        pdict = dict(CLs=CLs, p_sb=CLsb, p_b=CLb)
         return [pdict[key] for key in pvalues]
 
     return get_expected_CLs

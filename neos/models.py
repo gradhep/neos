@@ -1,9 +1,10 @@
-__all__ = ['Model', 'hepdata_like']
+__all__ = ["Model", "hepdata_like"]
 
 import jax
 import jax.numpy as jnp
 import pyhf
-pyhf.set_backend('jax')
+
+pyhf.set_backend("jax")
 
 # class-based
 class _Config(object):
@@ -15,9 +16,7 @@ class _Config(object):
         return jnp.asarray([1.0, 1.0])
 
     def suggested_bounds(self):
-        return jnp.asarray(
-            [jnp.asarray([0.0, 10.0]), jnp.asarray([0.0, 10.0])]
-        )
+        return jnp.asarray([jnp.asarray([0.0, 10.0]), jnp.asarray([0.0, 10.0])])
 
 
 class Model(object):
