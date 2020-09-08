@@ -28,6 +28,6 @@ modules = ["data.py",
 
 doc_url = "https://phinate.github.io/neos/"
 
-git_url = "https://github.com/phinate/neos/tree/talk/"
+git_url = "https://github.com/phinate/neos/"
 
 def custom_doc_links(name): return None
