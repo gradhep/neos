@@ -9,7 +9,6 @@ import jax.experimental.optimizers as optimizers
 from .transforms import to_bounded_vec, to_inf_vec, to_bounded, to_inf
 
 
-@jax.jit
 def global_fit(
     model_constructor,
     pdf_transform=False,
@@ -79,7 +78,6 @@ def global_fit(
     return global_fitter
 
 
-@jax.jit
 def constrained_fit(
     model_constructor,
     pdf_transform=False,

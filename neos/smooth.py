@@ -1,4 +1,4 @@
-__all__ = ["kde_hist", "cut"]
+__all__ = ["kde_hist"]
 
 import jax
 import jax.numpy as jnp
@@ -37,24 +37,3 @@ def kde_hist(events, bins, bandwidth=None, density=False):
         return counts / db / counts.sum(axis=0)
 
     return counts
-
-
-def cut(events, sign, cut_val, slope=1.0):
-    """
-    Event weights from cutting `events` at `cut_val` with logical operator `sign` = '>' or '<'.
-
-    Chain cuts by multiplying their output: `evt_weights = cut(data1, sign1, c1) * cut(data2, sign2, c2) etc.
-
-    Args:
-            events: (jax array-like) data to filter.
-    Returns:
-            event weights!
-    """
-    if sign == ">":
-        passed = 1 / (1 + jnp.exp(-slope * (events - cut_val)))
-    elif sign == "<":
-        passed = 1 - (1 / (1 + jnp.exp(-slope * (events - cut_val))))
-    else:
-        print("Invalid cut sign -- use > or <.")
-
-    return passed

@@ -248,7 +248,7 @@ pyhf.set_backend(jax_backend)
 
 from .models import hepdata_like
 
-@jax.jit
+
 def hepdata_like_from_hists(histogram_maker):
     """Returns a function that constructs a typical 'hepdata-like' statistical
     model with signal, background, and background uncertainty yields when
@@ -274,7 +274,7 @@ def hepdata_like_from_hists(histogram_maker):
 
     return nn_model_maker
 
-@jax.jit
+
 def histosys_model_from_hists(histogram_maker):
     """Returns a function that constructs a HEP statistical model using a
     'histosys' uncertainty for the background (nominal background, up and down
