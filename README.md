@@ -66,7 +66,13 @@ init_random_params, predict = stax.serial(
 
 Now, let's compose a workflow that can make use of this network in a typical high-energy physics statistical analysis. 
 
-A peculiarity to note is that each of the functions used in this step actually return functions themselves. The reason we do this is that we need a skeleton of the workflow with all of the fixed parameters to be in place before calculating the loss function, as the only 'moving parts' here are the weights of the neural network.
+Our workflow is as follows:
+- From a set of normal distributions with different means, we'll generate four blobs of `(x,y)` points, corresponding to a signal process, a nominal background process, and two variations of the background from varying the background distribution's mean up and down.
+- We'll then feed these points into the previously defined neural network for each blob, and construct a histogram of the output using kernel density estimation. The difference between the two background variations is used as a systematic uncertainty on the nominal background.
+- We can then leverage the magic of `pyhf` to construct an [event-counting statistical model](https://scikit-hep.org/pyhf/intro.html#histfactory) from the histogram yields.
+- Finally, we calculate the p-value of a test between the nominal signal and background-only hypotheses. This uses a [profile likelihood-based test statistic](https://arxiv.org/abs/1007.1727). 
+
+In code, `neos` can specify this workflow through function composition:
 
 ```python
 # data generator
@@ -78,6 +84,8 @@ model_maker = makers.histosys_model_from_hists(hist_maker)
 # CLs value getter
 get_cls = infer.expected_CLs(model_maker, solver_kwargs=dict(pdf_transform=True))
 ```
+
+A peculiarity to note is that each of the functions used in this step actually return functions themselves. The reason we do this is that we need a skeleton of the workflow with all of the fixed parameters to be in place before calculating the loss function, as the only 'moving parts' here are the weights of the neural network.
 
 `neos` also lets you specify hyperparameters for the histograms (e.g. binning, bandwidth) to allow these to be tuned throughout the learning process if neccesary (we don't do that here).
 
