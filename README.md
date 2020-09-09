@@ -14,7 +14,9 @@ Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/), [`fa
 
 Documentation can be found within the notebooks in the nbs folder, or (temporarily) at [phinate.github.io/neos](phinate.github.io/neos).
 
-To see examples of neos in action, look for the notebooks in the nbs folder with the `demo_` prefix.
+To see examples of `neos` in action, look for the notebooks in the nbs folder with the `demo_` prefix.
+
+If you're more of a video person, see [this talk](https://www.youtube.com/watch?v=3P4ZDkbleKs) given by [Nathan](https://github.com/phinate) on the broader topic of differentiable programming in high-energy physics, which also covers `neos`.
 
 ## Install
 
