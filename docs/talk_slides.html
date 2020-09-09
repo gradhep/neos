@@ -402,7 +402,7 @@ $$\varphi' = \varphi - \frac{\partial \, \mathsf{objective} }{\partial \, \maths
     <span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;slategray&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.6</span><span class="p">)</span>
     <span class="n">cam</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
 <span class="n">animation</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span>
-<span class="n">HTML</span><span class="p">(</span><span class="n">animation</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+<span class="c1"># HTML(animation.to_html5_video()) # uncomment for animation!</span>
 </pre></div>
 
     </div>
@@ -2199,8 +2199,7 @@ $$\Rightarrow \mathsf{kde}(x ; h) = \mathsf{mean}_{i\,\in\,\mathsf{len(data)}}[\
     <span class="n">cam</span><span class="o">.</span><span class="n">snap</span><span class="p">()</span>
 <span class="n">animation</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">animate</span><span class="p">()</span>
 <span class="c1"># animation.save(&#39;ani.gif&#39;,writer=&#39;imagemagick&#39;)</span>
-
-<span class="n">HTML</span><span class="p">(</span><span class="n">animation</span><span class="o">.</span><span class="n">to_html5_video</span><span class="p">())</span>
+<span class="c1"># HTML(animation.to_html5_video()) # uncomment for animation!</span>
 </pre></div>
 
     </div>
