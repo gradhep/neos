@@ -2,29 +2,32 @@
 
 __all__ = ["index", "modules", "custom_doc_links", "git_url"]
 
-index = {"Model": "00_models.ipynb",
-         "hepdata_like": "00_models.ipynb",
-         "hists_from_nn_three_blobs": "01_makers.ipynb",
-         "kde_bins_from_nn_three_blobs": "01_makers.ipynb",
-         "kde_bins_from_nn_histosys": "01_makers.ipynb",
-         "nn_hepdata_like": "01_makers.ipynb",
-         "nn_histosys": "01_makers.ipynb",
-         "to_bounded_vec": "02_transforms.ipynb",
-         "to_bounded": "02_transforms.ipynb",
-         "to_inf_vec": "02_transforms.ipynb",
-         "to_inf": "02_transforms.ipynb",
-         "get_solvers": "03_fit.ipynb",
-         "cls_maker": "04_cls.ipynb",
-         "pyhf_cls_maker": "04_cls.ipynb"}
+index = {"generate_blobs": "00_data.ipynb",
+         "kde_hist": "01_smooth.ipynb",
+         "hists_from_nn": "02_makers.ipynb",
+         "jax_backend": "02_makers.ipynb",
+         "hepdata_like_from_hists": "02_makers.ipynb",
+         "histosys_model_from_hists": "02_makers.ipynb",
+         "to_bounded_vec": "03_transforms.ipynb",
+         "to_bounded": "03_transforms.ipynb",
+         "to_inf_vec": "03_transforms.ipynb",
+         "to_inf": "03_transforms.ipynb",
+         "global_fit": "04_fit.ipynb",
+         "constrained_fit": "04_fit.ipynb",
+         "expected_CLs": "05_infer.ipynb",
+         "Model": "99_models.ipynb",
+         "hepdata_like": "99_models.ipynb"}
 
-modules = ["models.py",
+modules = ["data.py",
+           "smooth.py",
            "makers.py",
            "transforms.py",
            "fit.py",
-           "cls.py"]
+           "infer.py",
+           "models.py"]
 
 doc_url = "https://phinate.github.io/neos/"
 
-git_url = "https://github.com/phinate/neos/tree/master/"
+git_url = "https://github.com/phinate/neos/"
 
 def custom_doc_links(name): return None
