@@ -21,7 +21,7 @@ statuses = [ '1 - Planning', '2 - Pre-Alpha', '3 - Alpha',
 py_versions = '2.0 2.1 2.2 2.3 2.4 2.5 2.6 2.7 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7 3.8'.split()
 
 requirements = cfg.get('requirements','').split()
-requirements.append('pyhf @ git+https://github.com/scikit-hep/pyhf.git@diffable_json')
+requirements.append('pyhf @ git+https://github.com/phinate/pyhf.git@feat/change-default-backend')
 print(requirements)
 
 lic = licenses[cfg['license']]
