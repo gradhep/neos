@@ -12,7 +12,7 @@
 
 Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/), [`fax`](https://github.com/gehring/fax), and [`pyhf`](https://github.com/scikit-hep/pyhf)) to differentiate through a high-energy physics analysis workflow, including the construction of the frequentist profile likelihood.
 
-Documentation can be found within the notebooks in the nbs folder, or (temporarily) at [phinate.github.io/neos](phinate.github.io/neos).
+Documentation can be found at [gradhep.github.io/neos](gradhep.github.io/neos)!
 
 To see examples of `neos` in action, look for the notebooks in the nbs folder with the `demo_` prefix.
 

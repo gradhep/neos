@@ -10,29 +10,41 @@ entries:
       title: Overview
       url: /
     - output: web,pdf
-      title: neos.models
-      url: /models
+      title: neos.data
+      url: data.html
+    - output: web,pdf
+      title: neos.smooth
+      url: smooth.html
     - output: web,pdf
       title: neos.makers
-      url: /makers
+      url: makers.html
     - output: web,pdf
       title: neos.transforms
-      url: /transforms
+      url: transforms.html
     - output: web,pdf
       title: neos.fit
-      url: /fit
+      url: fit.html
     - output: web,pdf
-      title: neos.cls
-      url: /cls
+      title: neos.infer
+      url: infer.html
     - output: web,pdf
-      title: Testing out new kde-based method!
-      url: /demo_kde
+      title: neos.models
+      url: models.html
+    - output: web,pdf
+      title: 'Optimizing two models at once '
+      url: demo_2models.html
     - output: web,pdf
       title: KDE demo, with histosys!
-      url: /demo_kde_pyhf
+      url: demo_kde_pyhf.html
     - output: web,pdf
       title: The simple 2-bin demo w/ sigmoid activation
-      url: /demo_softmax
+      url: demo_softmax.html
+    - output: web,pdf
+      title: Softmax demo, with histosys!
+      url: demo_softmax_pyhf.html
+    - output: web,pdf
+      title: Physics analysis as a differentiable program
+      url: talk_slides.html
     output: web
     title: neos
   output: web

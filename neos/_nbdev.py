@@ -26,8 +26,8 @@ modules = ["data.py",
            "infer.py",
            "models.py"]
 
-doc_url = "https://phinate.github.io/neos/"
+doc_url = "https://gradhep.github.io/neos/"
 
-git_url = "https://github.com/phinate/neos/"
+git_url = "https://github.com/gradhep/neos/"
 
 def custom_doc_links(name): return None

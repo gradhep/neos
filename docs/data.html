@@ -26,12 +26,19 @@ nb_path: "nbs/00_data.ipynb"
     
 <div class="cell border-box-sizing code_cell rendered">
 
-</div>
-    {% endraw %}
+<div class="output_wrapper">
+<div class="output">
 
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
+<div class="output_area">
+
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>WARNING:absl:No GPU/TPU found, falling back to CPU. (Set TF_CPP_MIN_LOG_LEVEL=0 and rerun for more info.)
+</pre>
+</div>
+</div>
+
+</div>
+</div>
 
 </div>
     {% endraw %}
@@ -47,10 +54,10 @@ nb_path: "nbs/00_data.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="generate_blobs" class="doc_header"><code>generate_blobs</code><a href="__main__.py#L6" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>generate_blobs</code>(<strong><code>rng</code></strong>, <strong><code>blobs</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>DeviceArray([-1,  1], dtype=int32)</code></em>, <strong><code>bup_mean</code></strong>=<em><code>DeviceArray([2.5, 2. ], dtype=float32)</code></em>, <strong><code>bdown_mean</code></strong>=<em><code>DeviceArray([-2.5, -1.5], dtype=float32)</code></em>, <strong><code>b_mean</code></strong>=<em><code>DeviceArray([ 1, -1], dtype=int32)</code></em>)</p>
+<h4 id="generate_blobs" class="doc_header"><code>generate_blobs</code><a href="https://github.com/gradhep/neos/neos/data.py#L10" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>generate_blobs</code>(<strong><code>rng</code></strong>, <strong><code>blobs</code></strong>, <strong><code>NMC</code></strong>=<em><code>500</code></em>, <strong><code>sig_mean</code></strong>=<em><code>DeviceArray([-1,  1], dtype=int32)</code></em>, <strong><code>bup_mean</code></strong>=<em><code>DeviceArray([2.5, 2. ], dtype=float32)</code></em>, <strong><code>bdown_mean</code></strong>=<em><code>DeviceArray([-2.5, -1.5], dtype=float32)</code></em>, <strong><code>b_mean</code></strong>=<em><code>DeviceArray([ 1, -1], dtype=int32)</code></em>)</p>
 </blockquote>
-<p>Function that returns a callable to generate a set of 2D normally 
-distributed blobs, corresponding to signal, background, and background 
+<p>Function that returns a callable to generate a set of 2D normally
+distributed blobs, corresponding to signal, background, and background
 uncertainty modes.</p>
 <p>Args:
     rng: jax PRNG key (random seed).
@@ -67,6 +74,13 @@ uncertainty modes.</p>
 
 </div>
 </div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}

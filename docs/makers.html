@@ -54,13 +54,6 @@ nb_path: "nbs/02_makers.ipynb"
     
 <div class="cell border-box-sizing code_cell rendered">
 
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
 <div class="output_wrapper">
 <div class="output">
 
@@ -68,7 +61,7 @@ nb_path: "nbs/02_makers.ipynb"
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hists_from_nn" class="doc_header"><code>hists_from_nn</code><a href="https://github.com/phinate/neos/tree/talk/neos/makers.py#L15" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn</code>(<strong><code>data_generator</code></strong>, <strong><code>predict</code></strong>, <strong><code>method</code></strong>=<em><code>'softmax'</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
+<h4 id="hists_from_nn" class="doc_header"><code>hists_from_nn</code><a href="https://github.com/gradhep/neos/neos/makers.py#L15" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hists_from_nn</code>(<strong><code>data_generator</code></strong>, <strong><code>predict</code></strong>, <strong><code>method</code></strong>=<em><code>'softmax'</code></em>, <strong><code>LUMI</code></strong>=<em><code>10</code></em>, <strong><code>sig_scale</code></strong>=<em><code>2</code></em>, <strong><code>bkg_scale</code></strong>=<em><code>10</code></em>)</p>
 </blockquote>
 <p>Initialize a function <code>hist_maker</code> that returns a 'soft' histogram based
 on a neural network with a softmax output. Choose which example problem to
@@ -101,6 +94,13 @@ bkg_scale: Individual scaling factor for the signal yields.
 
 </div>
 </div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}
@@ -219,13 +219,6 @@ bkg_scale: Individual scaling factor for the signal yields.
     
 <div class="cell border-box-sizing code_cell rendered">
 
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
 <div class="output_wrapper">
 <div class="output">
 
@@ -233,7 +226,7 @@ bkg_scale: Individual scaling factor for the signal yields.
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="hepdata_like_from_hists" class="doc_header"><code>hepdata_like_from_hists</code><a href="https://github.com/phinate/neos/tree/talk/neos/makers.py#L266" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hepdata_like_from_hists</code>(<strong><code>histogram_maker</code></strong>)</p>
+<h4 id="hepdata_like_from_hists" class="doc_header"><code>hepdata_like_from_hists</code><a href="https://github.com/gradhep/neos/neos/makers.py#L266" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>hepdata_like_from_hists</code>(<strong><code>histogram_maker</code></strong>)</p>
 </blockquote>
 <p>Returns a function that constructs a typical 'hepdata-like' statistical
 model with signal, background, and background uncertainty yields when
@@ -252,6 +245,13 @@ evaluated at the parameters of the observable.</p>
 
 </div>
 </div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}
@@ -351,13 +351,6 @@ evaluated at the parameters of the observable.</p>
     
 <div class="cell border-box-sizing code_cell rendered">
 
-</div>
-    {% endraw %}
-
-    {% raw %}
-    
-<div class="cell border-box-sizing code_cell rendered">
-
 <div class="output_wrapper">
 <div class="output">
 
@@ -365,7 +358,7 @@ evaluated at the parameters of the observable.</p>
 
 
 <div class="output_markdown rendered_html output_subarea ">
-<h4 id="histosys_model_from_hists" class="doc_header"><code>histosys_model_from_hists</code><a href="https://github.com/phinate/neos/tree/talk/neos/makers.py#L292" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>histosys_model_from_hists</code>(<strong><code>histogram_maker</code></strong>)</p>
+<h4 id="histosys_model_from_hists" class="doc_header"><code>histosys_model_from_hists</code><a href="https://github.com/gradhep/neos/neos/makers.py#L292" class="source_link" style="float:right">[source]</a></h4><blockquote><p><code>histosys_model_from_hists</code>(<strong><code>histogram_maker</code></strong>)</p>
 </blockquote>
 <p>Returns a function that constructs a HEP statistical model using a
 'histosys' uncertainty for the background (nominal background, up and down
@@ -384,6 +377,13 @@ systematic variations) when evaluated at the parameters of the observable.</p>
 
 </div>
 </div>
+
+</div>
+    {% endraw %}
+
+    {% raw %}
+    
+<div class="cell border-box-sizing code_cell rendered">
 
 </div>
     {% endraw %}
