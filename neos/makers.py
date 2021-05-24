@@ -13,7 +13,7 @@ from relaxed import hist_kde as hist
 
 # Cell
 def hists_from_nn(
-    data_generator, predict, hpar_dict, method="softmax", LUMI=10, sig_scale=2, bkg_scale=10,
+    data_generator, predict, hpar_dict, method="softmax", LUMI=10, sig_scale=2, bkg_scale=10, reflect_infinities=False
 ):
     """Initialize a function `hist_maker` that returns a 'soft' histogram based
     on a neural network with a softmax output. Choose which example problem to
@@ -123,12 +123,12 @@ def hists_from_nn(
                     predict(nn, b_down).ravel(),
                 )
 
-                s_hist = hist(nn_s, bins, bandwidth) * sig_scale / NMC * LUMI
+                s_hist = hist(nn_s, bins, bandwidth, reflect_infinities=reflect_infinities) * sig_scale / NMC * LUMI
 
                 b_hists = jnp.asarray(
                     [
-                        hist(nn_b_up, bins, bandwidth)   * bkg_scale / NMC * LUMI,
-                        hist(nn_b_down, bins, bandwidth) * bkg_scale / NMC * LUMI,
+                        hist(nn_b_up, bins, bandwidth, reflect_infinities=reflect_infinities)   * bkg_scale / NMC * LUMI,
+                        hist(nn_b_down, bins, bandwidth, reflect_infinities=reflect_infinities) * bkg_scale / NMC * LUMI,
                     ]
                 )
 
@@ -229,13 +229,13 @@ def hists_from_nn(
                 )
 
                 kde_counts = [
-                    hist(nn_s, bins, bandwidth)      * sig_scale / NMC * LUMI,
-                    hist(nn_b_nom, bins, bandwidth)  * bkg_scale / NMC * LUMI,
-                    hist(nn_b_up, bins, bandwidth)   * bkg_scale / NMC * LUMI,
-                    hist(nn_b_down, bins, bandwidth) * bkg_scale / NMC * LUMI,
+                    hist(nn_s, bins, bandwidth, reflect_infinities=reflect_infinities)      * sig_scale / NMC * LUMI,
+                    hist(nn_b_nom, bins, bandwidth, reflect_infinities=reflect_infinities)  * bkg_scale / NMC * LUMI,
+                    hist(nn_b_up, bins, bandwidth, reflect_infinities=reflect_infinities)   * bkg_scale / NMC * LUMI,
+                    hist(nn_b_down, bins, bandwidth, reflect_infinities=reflect_infinities) * bkg_scale / NMC * LUMI,
                 ]
 
-                return kde_counts
+                return [k + 1e-8 for k in kde_counts]
 
         else:
             assert False, (
