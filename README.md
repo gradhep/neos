@@ -1,8 +1,44 @@
 # neos
 > ~neural~ nice end-to-end optimized statistics
+# neos
+
+[![Actions Status][actions-badge]][actions-link]
+[![Coverage Status][codecov-badge]][codecov-link]
+[![Documentation Status][rtd-badge]][rtd-link]
+[![Code style: black][black-badge]][black-link]
+
+[![PyPI version][pypi-version]][pypi-link]
+[![Conda-Forge][conda-badge]][conda-link]
+[![PyPI platforms][pypi-platforms]][pypi-link]
+
+[![GitHub Discussion][github-discussions-badge]][github-discussions-link]
+[![Gitter][gitter-badge]][gitter-link]
 
 
-[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682) ![CI](https://github.com/pyhf/neos/workflows/CI/badge.svg) [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/pyhf/neos/master?filepath=demo_training.ipynb)
+
+
+[actions-badge]:            https://github.com/gradhep/neos/workflows/CI/badge.svg
+[actions-link]:             https://github.com/gradhep/neos/actions
+[black-badge]:              https://img.shields.io/badge/code%20style-black-000000.svg
+[black-link]:               https://github.com/psf/black
+[conda-badge]:              https://img.shields.io/conda/vn/conda-forge/neos
+[conda-link]:               https://github.com/conda-forge/neos-feedstock
+[codecov-badge]:            https://app.codecov.io/gh/gradhep/neos/branch/main/graph/badge.svg
+[codecov-link]:             https://app.codecov.io/gh/gradhep/neos
+[github-discussions-badge]: https://img.shields.io/static/v1?label=Discussions&message=Ask&color=blue&logo=github
+[github-discussions-link]:  https://github.com/gradhep/neos/discussions
+[gitter-badge]:             https://badges.gitter.im/https://github.com/gradhep/neos/community.svg
+[gitter-link]:              https://gitter.im/https://github.com/gradhep/neos/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+[pypi-link]:                https://pypi.org/project/neos/
+[pypi-platforms]:           https://img.shields.io/pypi/pyversions/neos
+[pypi-version]:             https://badge.fury.io/py/neos.svg
+[rtd-badge]:                https://readthedocs.org/projects/neos/badge/?version=latest
+[rtd-link]:                 https://neos.readthedocs.io/en/latest/?badge=latest
+[sk-badge]:                 https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg
+
+
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)  
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo_kde_pyhf.ipynb)
 
 <img src="nbs/assets/neos_logo.png" alt="neos logo" width="250">
 
