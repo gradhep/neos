@@ -25,7 +25,7 @@ pyhf.set_backend("jax")
 pyhf.default_backend = pyhf.tensor.jax_backend(precision="64b")
 
 
-def neos_pyhf_example(rng=PRNGKey(1)):
+def neos_pyhf_example(rng=PRNGKey(1), maxN=10):
 
     # regression net
     init_random_params, predict = stax.serial(
@@ -99,8 +99,6 @@ def neos_pyhf_example(rng=PRNGKey(1)):
             metrics = {"loss": losses}
 
             yield network, metrics, epoch_time
-
-    maxN = 50  # make me bigger for better results!
 
     # Training
     for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
