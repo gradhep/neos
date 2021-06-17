@@ -2,7 +2,7 @@
 # To add a new markdown cell, type '# %% [markdown]'
 # %% [markdown]
 # # KDE demo, with histosys!
-# 
+#
 # > It works :)
 # %% [markdown]
 # ![](assets/kde_pyhf_animation.gif)
@@ -14,19 +14,18 @@ import jax
 import jax.experimental.optimizers as optimizers
 import jax.experimental.stax as stax
 import jax.random
-from jax.random import PRNGKey
 import numpy as np
-
 import pyhf
-pyhf.set_backend('jax')
-pyhf.default_backend = pyhf.tensor.jax_backend(precision='64b')
+from jax.random import PRNGKey
+from relaxed import infer
 
 from .. import data, makers
-from relaxed import infer
+
+pyhf.set_backend("jax")
+pyhf.default_backend = pyhf.tensor.jax_backend(precision="64b")
 
 
 def neos_pyhf_example(rng=PRNGKey(1)):
-
 
     # regression net
     init_random_params, predict = stax.serial(
@@ -42,15 +41,20 @@ def neos_pyhf_example(rng=PRNGKey(1)):
     # ## Compose differentiable workflow
 
     # %%
-    dgen = data.generate_blobs(rng,blobs=4) 
+    dgen = data.generate_blobs(rng, blobs=4)
 
     # Specify our hyperparameters ahead of time for the kde histograms
-    bins = np.linspace(0,1,4)
-    bandwidth=0.27
+    bins = np.linspace(0, 1, 4)
+    bandwidth = 0.27
     reflect_infinite_bins = True
 
-    hmaker = makers.hists_from_nn(dgen, predict, hpar_dict = dict(bins=bins,bandwidth=bandwidth),method='kde', reflect_infinities=reflect_infinite_bins)
-
+    hmaker = makers.hists_from_nn(
+        dgen,
+        predict,
+        hpar_dict=dict(bins=bins, bandwidth=bandwidth),
+        method="kde",
+        reflect_infinities=reflect_infinite_bins,
+    )
 
     # %%
     nnm = makers.histosys_model_from_hists(hmaker)
@@ -76,7 +80,6 @@ def neos_pyhf_example(rng=PRNGKey(1)):
     opt_init, opt_update, opt_params = optimizers.adam(1e-3)
 
     def train_network(N):
-        cls_vals = []
         _, network = init_random_params(jax.random.PRNGKey(1), (-1, 2))
         state = opt_init(network)
         losses = []
@@ -95,16 +98,13 @@ def neos_pyhf_example(rng=PRNGKey(1)):
             losses.append(value)
             metrics = {"loss": losses}
 
-
-            
             yield network, metrics, epoch_time
 
     maxN = 50  # make me bigger for better results!
 
     # Training
     for i, (network, metrics, epoch_time) in enumerate(train_network(maxN)):
-        print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s')
+        pass  # print(f"epoch {i}:", f'CLs = {metrics["loss"][-1]}, took {epoch_time}s')
     # %%
 
-    return metrics["loss"][-1] 
-
+    return metrics["loss"][-1]

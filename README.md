@@ -37,7 +37,7 @@
 [sk-badge]:                 https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg
 
 
-[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)  
+[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo_kde_pyhf.ipynb)
 
 <img src="nbs/assets/neos_logo.png" alt="neos logo" width="250">
@@ -102,13 +102,13 @@ init_random_params, predict = stax.serial(
 )
 ```
 
-Now, let's compose a workflow that can make use of this network in a typical high-energy physics statistical analysis. 
+Now, let's compose a workflow that can make use of this network in a typical high-energy physics statistical analysis.
 
 Our workflow is as follows:
 - From a set of normal distributions with different means, we'll generate four blobs of `(x,y)` points, corresponding to a signal process, a nominal background process, and two variations of the background from varying the background distribution's mean up and down.
 - We'll then feed these points into the previously defined neural network for each blob, and construct a histogram of the output using kernel density estimation. The difference between the two background variations is used as a systematic uncertainty on the nominal background.
 - We can then leverage the magic of `pyhf` to construct an [event-counting statistical model](https://scikit-hep.org/pyhf/intro.html#histfactory) from the histogram yields.
-- Finally, we calculate the p-value of a test between the nominal signal and background-only hypotheses. This uses a [profile likelihood-based test statistic](https://arxiv.org/abs/1007.1727). 
+- Finally, we calculate the p-value of a test between the nominal signal and background-only hypotheses. This uses a [profile likelihood-based test statistic](https://arxiv.org/abs/1007.1727).
 
 In code, `neos` can specify this workflow through function composition:
 
