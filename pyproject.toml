@@ -8,7 +8,7 @@ write_to = "src/neos/_version.py"
 
 
 [tool.pytest.ini_options]
-addopts = "-ra -Wd"
+addopts = "-ra -Wd --cov=relaxed --cov-report html --cov-report term-missing"
 testpaths = ["tests"]
 
 
