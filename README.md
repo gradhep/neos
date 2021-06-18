@@ -2,7 +2,7 @@
 > ~neural~ nice end-to-end optimized statistics
 
 [![Actions Status][actions-badge]][actions-link]
-[![Coverage Status][codecov-badge]][codecov-link]
+[![Coverage Status](https://codecov.io/gh/gradhep/neos/branch/main/graph/badge.svg?token=NHT2SRRJLV)](https://codecov.io/gh/gradhep/neos)
 [![Documentation Status][rtd-badge]][rtd-link]
 [![Code style: black][black-badge]][black-link]
 
