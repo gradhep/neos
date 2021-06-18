@@ -1,6 +1,5 @@
 # neos
 > ~neural~ nice end-to-end optimized statistics
-# neos
 
 [![Actions Status][actions-badge]][actions-link]
 [![Coverage Status][codecov-badge]][codecov-link]
