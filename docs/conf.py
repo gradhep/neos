@@ -45,7 +45,7 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store", 
 #
 html_theme = "sphinx_book_theme"
 
-html_title = f"Hist {version}"
+html_title = f"{project}"
 
 html_baseurl = "https://neos.readthedocs.io/en/latest/"
 
