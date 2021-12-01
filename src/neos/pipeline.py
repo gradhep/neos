@@ -83,6 +83,8 @@ class Pipeline(NamedTuple):
         "gaussianity",
     )
     animate: bool = True
+    plotname: str = "neos_demo.png"
+    animationname: str = "neos_demo.gif"
 
     def run(self):
         pyhf.set_backend("jax", default=True)
@@ -195,6 +197,7 @@ class Pipeline(NamedTuple):
                     this_batch=batch_data,
                     metrics=metrics,
                     maxN=self.num_epochs,
+                    pipeline=self,
                     **self.yield_kwargs,
                     **plot_kwargs,
                 )
@@ -209,5 +212,5 @@ class Pipeline(NamedTuple):
                 )
         if self.animate:
             plot_kwargs["camera"].animate().save(
-                "animation.gif", writer="imagemagick", fps=8
+                f"{self.animationname}", writer="imagemagick", fps=9
             )

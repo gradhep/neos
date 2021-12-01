@@ -1,4 +1,13 @@
-__all__ = ("gen_blobs", "make_model", "nn_summary_stat")
+__all__ = (
+    "generate_data",
+    "make_model",
+    "nn_summary_stat",
+    "plot",
+    "plot_setup",
+    "first_epoch",
+    "last_epoch",
+    "per_epoch",
+)
 
 import jax
 import jax.numpy as jnp
@@ -7,10 +16,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyhf
 import relaxed
+from celluloid import Camera
 from jax.random import PRNGKey, multivariate_normal
 
 
-def gen_blobs(
+def generate_data(
     rng=0,
     num_points=10000,
     sig_mean=(-1, 1),
@@ -259,7 +269,7 @@ def plot(
     # ax.axhline(0.05, c="slategray", linestyle="--")
     ax.plot(metrics["loss"], c="C9", linewidth=2.0, label=r"train $\log(CL_s)$")
     # ax.plot(metrics["test_loss"], c="C4", linewidth=2.0, label=r"test $\log(CL_s)$")
-    # ax.set_yscale("log")
+    ax.set_yscale("log")
     # ax.set_ylim(1e-4, 0.06)
     ax.set_xlim(0, maxN)
     ax.set_xlabel("epoch")
@@ -416,3 +426,157 @@ def plot(
         ax.legend(
             handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
         )
+
+
+def first_epoch(
+    network,
+    camera,
+    axs,
+    axins,
+    metrics,
+    maxN,
+    this_batch,
+    nn,
+    bins,
+    bandwidth,
+    **kwargs,
+):
+    plot(
+        axs=axs,
+        axins=axins,
+        network=network,
+        metrics=metrics,
+        maxN=maxN,
+        this_batch=this_batch,
+        nn=nn,
+        bins=bins,
+        bandwidth=bandwidth,
+        legend=True,
+    )
+    plt.tight_layout()
+    camera.snap()
+    return camera
+
+
+def last_epoch(
+    network,
+    camera,
+    axs,
+    axins,
+    metrics,
+    maxN,
+    this_batch,
+    nn,
+    bins,
+    bandwidth,
+    pipeline,
+    **kwargs,
+):
+    plot(
+        axs=axs,
+        axins=axins,
+        network=network,
+        metrics=metrics,
+        maxN=maxN,
+        this_batch=this_batch,
+        nn=nn,
+        bins=bins,
+        bandwidth=bandwidth,
+    )
+    plt.tight_layout()
+    camera.snap()
+    fig2, axs2 = plt.subplot_mosaic(
+        [
+            ["Data space", "Histogram model", "Example KDE"],
+            ["Losses", "Metrics", "Nuisance pull"],
+        ]
+    )
+
+    for label, ax in axs2.items():
+        ax.set_title(label, fontstyle="italic")
+    axins2 = axs2["Example KDE"].inset_axes([0.01, 0.79, 0.3, 0.2])
+    axins2.axis("off")
+    plot(
+        axs=axs2,
+        axins=axins2,
+        network=network,
+        metrics=metrics,
+        maxN=maxN,
+        this_batch=this_batch,
+        nn=nn,
+        bins=bins,
+        bandwidth=bandwidth,
+        legend=True,
+    )
+    plt.tight_layout()
+    fig2.savefig(f"{pipeline.plotname}")
+    return camera
+
+
+def per_epoch(
+    network,
+    camera,
+    axs,
+    axins,
+    metrics,
+    maxN,
+    this_batch,
+    nn,
+    bins,
+    bandwidth,
+    **kwargs,
+):
+    plot(
+        axs=axs,
+        axins=axins,
+        network=network,
+        metrics=metrics,
+        maxN=maxN,
+        this_batch=this_batch,
+        nn=nn,
+        bins=bins,
+        bandwidth=bandwidth,
+    )
+    plt.tight_layout()
+    camera.snap()
+    return camera
+
+
+def plot_setup(pipeline):
+    plt.style.use("default")
+
+    plt.rcParams.update(
+        {
+            "axes.labelsize": 13,
+            "axes.linewidth": 1.2,
+            "xtick.labelsize": 13,
+            "ytick.labelsize": 13,
+            "figure.figsize": [16.0, 9.0],
+            "font.size": 13,
+            "xtick.major.size": 3,
+            "ytick.major.size": 3,
+            "legend.fontsize": 11,
+        }
+    )
+
+    plt.rc("figure", dpi=120)
+
+    fig, axs = plt.subplot_mosaic(
+        [
+            ["Data space", "Histogram model", "Example KDE"],
+            ["Losses", "Metrics", "Nuisance pull"],
+        ]
+    )
+
+    for label, ax in axs.items():
+        ax.set_title(label, fontstyle="italic")
+    axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
+    axins = axs["Example KDE"].inset_axes([0.01, 0.79, 0.3, 0.2])
+    axins.axis("off")
+    ax_cpy = axs
+    axins_cpy = axins
+    if pipeline.animate:
+        camera = Camera(fig)
+    return dict(
+        camera=camera, axs=axs, axins=axins, ax_cpy=ax_cpy, axins_cpy=axins_cpy, fig=fig
+    )
