@@ -8,19 +8,28 @@ write_to = "src/neos/_version.py"
 
 
 [tool.pytest.ini_options]
-addopts = "-ra -Wd --cov=neos --cov-report html --cov-report term-missing"
-testpaths = ["tests"]
+minversion = "6.0"
+addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
+xfail_strict = true
+filterwarnings = ["error"]
+testpaths = [
+    "tests",
+]
+
+
+[tool.pycln]
+all = true
 
 
 [tool.mypy]
 files = "src"
-python_version = "3.7"
+python_version = "3.6"
 warn_unused_configs = true
 
 disallow_any_generics = true
 disallow_subclassing_any = true
-disallow_untyped_calls = false
-disallow_untyped_defs = false
+disallow_untyped_calls = true
+disallow_untyped_defs = true
 disallow_incomplete_defs = true
 check_untyped_defs = true
 disallow_untyped_decorators = true
@@ -39,4 +48,8 @@ ignore = [
     ".pre-commit-config.yaml",
     ".readthedocs.yml",
     "src/*/_version.py",
+    "noxfile.py",
 ]
+
+[tool.isort]
+profile = "black"

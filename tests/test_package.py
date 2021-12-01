@@ -1,10 +1,5 @@
-import neos
-from neos.examples import neos_pyhf_example
+import neos as m
 
 
 def test_version():
-    assert neos.__version__
-
-
-def test_workflow():
-    assert neos_pyhf_example()
+    assert m.__version__
