@@ -3,4 +3,8 @@ graft src
 graft tests
 
 include LICENSE README.md pyproject.toml setup.py setup.cfg
+include *.gif
+include *.ipynb
+include *.md
+include *.pdf
 global-exclude __pycache__ *.py[cod] .*
