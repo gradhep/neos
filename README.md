@@ -36,7 +36,7 @@
 
 
 [![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo_kde_pyhf.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo.ipynb)
 
 <img src="nbs/assets/neos_logo.png" alt="neos logo" width="250">
 
