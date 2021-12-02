@@ -67,6 +67,7 @@ This workflow is as follows:
 - We'll then feed these points into the previously defined neural network for each blob, and construct a histogram of the output using kernel density estimation. The difference between the two background variations is used as a systematic uncertainty on the nominal background.
 - We can then leverage the magic of `pyhf` to construct an [event-counting statistical model](https://scikit-hep.org/pyhf/intro.html#histfactory) from the histogram yields.
 - Finally, we calculate the p-value of a test between the nominal signal and background-only hypotheses. This uses the familiar [profile likelihood-based test statistic](https://arxiv.org/abs/1007.1727).
+
 This counts as one forward pass of the workflow -- we then optimize the neural network by gradient descent, backpropagating through the whole analysis!
 
 
