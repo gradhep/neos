@@ -66,6 +66,7 @@ class Pipeline(NamedTuple):
     yields_from_pars: Callable[..., tuple[Array, ...]]
     model_from_yields: Callable[..., pyhf.Model]
     init_pars: Array
+    nn: Callable[..., Any] | None = None
     data: Array | None = None
     yield_kwargs: dict[str, Any] | None = None
     nuisance_parname: str = "correlated_bkg_uncertainty"
@@ -88,14 +89,15 @@ class Pipeline(NamedTuple):
         "gaussianity",
     )
     animate: bool = True
-    plotname: str = "neos_demo.png"
-    animationname: str = "neos_demo.gif"
+    plot_name: str = "neos_demo.png"
+    animation_name: str = "neos_demo.gif"
+    plot_title: str | None = None
 
     def run(self):
         pyhf.set_backend("jax", default=True)
 
         def pipeline(pars, data):
-            yields = self.yields_from_pars(pars, data, **self.yield_kwargs)
+            yields = self.yields_from_pars(pars, data, self.nn, **self.yield_kwargs)
             model = self.model_from_yields(*yields)
             state: dict[str, Any] = {}
             state["yields"] = yields
@@ -104,16 +106,16 @@ class Pipeline(NamedTuple):
                 .at[model.config.poi_index]
                 .set(0.0)
             )
-            data = jnp.asarray(model.expected_data(bonly_pars))
+            data_hf = jnp.asarray(model.expected_data(bonly_pars))
             state["CLs"], constrained = hypotest(
                 1.0,
-                data,
+                data_hf,
                 model,
                 return_constrained_pars=True,
                 bonly_pars=bonly_pars,
                 lr=1e-2,
             )
-            uncerts = relaxed.cramer_rao_uncert(model, bonly_pars, data)
+            uncerts = relaxed.cramer_rao_uncert(model, bonly_pars, data_hf)
             state["mu_uncert"] = uncerts[model.config.poi_index]
             pull_width = uncerts[model.config.par_slice(self.nuisance_parname)][0]
             state["pull_width"] = pull_width
@@ -129,7 +131,13 @@ class Pipeline(NamedTuple):
                     if model.config.param_set(k).constrained
                 ]
             )
+            state["data"] = data
+            state["pars"] = pars
+            state["nn"] = self.nn
             loss = self.loss(state)
+            del state["data"]
+            del state["nn"]
+            del state["pars"]
             state["loss"] = loss
             return loss, state
 
@@ -221,6 +229,7 @@ class Pipeline(NamedTuple):
                         maxN=self.num_epochs,
                         batch_num=batch_num,
                         epoch_grid=epoch_grid,
+                        nn=self.nn,
                         **self.yield_kwargs,
                         **plot_kwargs,
                     )
@@ -232,6 +241,7 @@ class Pipeline(NamedTuple):
                         maxN=self.num_epochs,
                         batch_num=batch_num + (epoch_num * num_batches),
                         epoch_grid=epoch_grid,
+                        nn=self.nn,
                         pipeline=self,
                         **self.yield_kwargs,
                         **plot_kwargs,
@@ -243,11 +253,12 @@ class Pipeline(NamedTuple):
                         metrics=metrics,
                         maxN=self.num_epochs,
                         batch_num=batch_num + (epoch_num * num_batches),
+                        nn=self.nn,
                         epoch_grid=epoch_grid,
                         **self.yield_kwargs,
                         **plot_kwargs,
                     )
         if self.animate:
             plot_kwargs["camera"].animate().save(
-                f"{self.animationname}", writer="imagemagick", fps=9
+                f"{self.animation_name}", writer="imagemagick", fps=10
             )

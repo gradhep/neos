@@ -88,11 +88,20 @@ def make_model(s, b_nom, b_up, b_down):
 
 
 def nn_summary_stat(
-    pars, data, nn, bandwidth, bins, reflect=False, sig_scale=2, bkg_scale=10, LUMI=10
+    pars,
+    data,
+    nn,
+    bandwidth,
+    bins,
+    reflect=False,
+    sig_scale=2,
+    bkg_scale=10,
+    LUMI=10,
+    return_preds=False,
 ):
     s_data, b_nom_data, b_up_data, b_down_data = data
 
-    nn_s, nn_b_nom, nn_b_up, nn_b_down = (
+    preds = nn_s, nn_b_nom, nn_b_up, nn_b_down = (
         nn(pars, s_data).ravel(),
         nn(pars, b_nom_data).ravel(),
         nn(pars, b_up_data).ravel(),
@@ -124,7 +133,8 @@ def nn_summary_stat(
         / num_points
         * LUMI,
     ]
-
+    if return_preds:
+        return yields, preds
     return yields
 
 
@@ -540,7 +550,7 @@ def last_epoch(
         legend=True,
     )
     plt.tight_layout()
-    fig2.savefig(f"{pipeline.plotname}")
+    fig2.savefig(f"{pipeline.plot_name}")
     return camera
 
 
@@ -613,6 +623,7 @@ def plot_setup(pipeline):
     axins_cpy = axins
     if pipeline.animate:
         camera = Camera(fig)
+    plt.suptitle(pipeline.plot_title, fontweight="bold")
     return dict(
         camera=camera, axs=axs, axins=axins, ax_cpy=ax_cpy, axins_cpy=axins_cpy, fig=fig
     )
