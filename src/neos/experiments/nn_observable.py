@@ -265,12 +265,24 @@ def plot(
     ax.set_ylim(-5, 5)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
-    if legend: 
+    if legend:
         ax.legend(fontsize="x-small", loc="upper right")
     ax = axs["Losses"]
-    x_grid = epoch_grid[:batch_num+1]
-    ax.plot(epoch_grid[:batch_num+1], metrics["loss"], c="C9", linewidth=2.0, label=r"train")
-    ax.plot(epoch_grid[:batch_num+1], metrics["test_loss"], c="C4", linewidth=2.0, label=r"test")
+    x_grid = epoch_grid[: batch_num + 1]
+    ax.plot(
+        epoch_grid[: batch_num + 1],
+        metrics["loss"],
+        c="C9",
+        linewidth=2.0,
+        label=r"train",
+    )
+    ax.plot(
+        epoch_grid[: batch_num + 1],
+        metrics["test_loss"],
+        c="C4",
+        linewidth=2.0,
+        label=r"test",
+    )
     ax.set_yscale("log")
     ax.set_xlim(0, maxN)
     ax.set_xlabel("epoch")
@@ -286,7 +298,13 @@ def plot(
         linewidth=2.0,
         label=r"$(1-\sigma_{\mathsf{nuisance}})^2$",
     )
-    ax.plot(x_grid, metrics["mu_uncert"], c="steelblue", linewidth=2.0, label=r"$\sigma_\mu$")
+    ax.plot(
+        x_grid,
+        metrics["mu_uncert"],
+        c="steelblue",
+        linewidth=2.0,
+        label=r"$\sigma_\mu$",
+    )
     ax.plot(x_grid, metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
     # ax.set_ylim(1e-4, 0.06)
     ax.set_xlim(0, maxN)
@@ -492,7 +510,7 @@ def last_epoch(
         nn=nn,
         bins=bins,
         bandwidth=bandwidth,
-        legend=False
+        legend=False,
     )
     plt.tight_layout()
     camera.snap()

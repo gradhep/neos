@@ -4,8 +4,8 @@ __all__ = ("Pipeline",)
 
 import time
 from functools import partial
-import pprint
 from typing import Any, Callable, NamedTuple
+
 import jax.numpy as jnp
 import jaxopt
 import numpy.random as npr
@@ -21,7 +21,7 @@ from neos.utils import FormatPrinter, isnotebook
 in_jupyter = isnotebook()
 if in_jupyter:
     from IPython import display
-    import matplotlib.pyplot as plt
+
 
 @partial(
     jit, static_argnames=["model", "return_mle_pars", "return_constrained_pars"]
@@ -157,6 +157,7 @@ class Pipeline(NamedTuple):
             batches = data_stream()
         else:
             num_batches = 0
+
             def blank_data():
                 while True:
                     yield None
@@ -166,27 +167,35 @@ class Pipeline(NamedTuple):
         solver = jaxopt.OptaxSolver(
             fun=pipeline, opt=optax.adam(self.learning_rate), has_aux=True, jit=True
         )
-        state = solver.init_state(init_params = self.init_pars)
+        state = solver.init_state(init_params=self.init_pars)
         params = self.init_pars
 
         plot_kwargs = self.plot_setup(self)
 
-        metrics = {"CLs": [], "mu_uncert": [], "1-pull_width**2": [], "loss": [], "test_loss": []}
+        metrics = {
+            "CLs": [],
+            "mu_uncert": [],
+            "1-pull_width**2": [],
+            "loss": [],
+            "test_loss": [],
+        }
         metric_keys = list(metrics.keys())
-        epoch_grid = jnp.linspace(0, self.num_epochs, num_batches*self.num_epochs)
+        epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
         for epoch_num in range(self.num_epochs):
             print(f"epoch {epoch_num}: {num_batches} batches")
             for batch_num in range(num_batches):
                 print(f"batch {batch_num+1}/{num_batches}:")
                 batch_data = next(batches)
                 start = time.perf_counter()
-                params, state = solver.update(params=params, state=state, data=batch_data)
+                params, state = solver.update(
+                    params=params, state=state, data=batch_data
+                )
                 end = time.perf_counter()
                 test_loss, test_metrics = pipeline(pars=params, data=test)
                 t = end - start
-                
+
                 for key in test_metrics:
-                    if key == 'loss':
+                    if key == "loss":
                         metrics["loss"].append(state.aux[key])
                         metrics["test_loss"].append(test_loss)
                     else:
@@ -194,17 +203,17 @@ class Pipeline(NamedTuple):
                             metrics[key].append(test_metrics[key])
                         else:
                             metrics[key] = test_metrics[key]
-                    
+
                 if in_jupyter:
                     display.clear_output(wait=True)
-                l = state.aux['loss']
+                l = state.aux["loss"]
                 print(f"epoch {epoch_num}: {num_batches} batches")
                 print(f"batch {batch_num+1}/{num_batches} took {t:.4f}s.")
-                print(f'batch loss: {l}')
-                print('test metrics:')
+                print(f"batch loss: {l}")
+                print("test metrics:")
                 FormatPrinter({float: "%.3f", int: "%06X"}).pprint(test_metrics)
 
-                if batch_num+epoch_num == 0:
+                if batch_num + epoch_num == 0:
                     plot_kwargs["camera"] = self.first_epoch_callback(
                         params,
                         this_batch=test,
@@ -215,13 +224,13 @@ class Pipeline(NamedTuple):
                         **self.yield_kwargs,
                         **plot_kwargs,
                     )
-                elif batch_num+epoch_num == num_batches-1+self.num_epochs-1:
+                elif batch_num + epoch_num == num_batches - 1 + self.num_epochs - 1:
                     plot_kwargs["camera"] = self.last_epoch_callback(
                         params,
                         this_batch=test,
                         metrics=metrics,
                         maxN=self.num_epochs,
-                        batch_num=batch_num+(epoch_num*num_batches),
+                        batch_num=batch_num + (epoch_num * num_batches),
                         epoch_grid=epoch_grid,
                         pipeline=self,
                         **self.yield_kwargs,
@@ -233,7 +242,7 @@ class Pipeline(NamedTuple):
                         this_batch=test,
                         metrics=metrics,
                         maxN=self.num_epochs,
-                        batch_num=batch_num+(epoch_num*num_batches),
+                        batch_num=batch_num + (epoch_num * num_batches),
                         epoch_grid=epoch_grid,
                         **self.yield_kwargs,
                         **plot_kwargs,
