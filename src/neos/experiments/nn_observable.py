@@ -222,9 +222,11 @@ def plot(
     metrics,
     maxN,
     this_batch,
+    epoch_grid,
     nn,
     bins,
     bandwidth,
+    batch_num,
     legend=False,
     reflect=False,
 ):
@@ -249,7 +251,7 @@ def plot(
         levels=levels,
     )
     sig, bkg_nom, bkg_up, bkg_down = this_batch
-
+    # should definitely not have to repeat this every time lmao
     ax.scatter(sig[:, 0], sig[:, 1], alpha=0.3, c="C9", label="signal")
     ax.scatter(
         bkg_up[:, 0], bkg_up[:, 1], alpha=0.1, c="orangered", marker=6, label="bkg up"
@@ -263,34 +265,34 @@ def plot(
     ax.set_ylim(-5, 5)
     ax.set_xlabel("x")
     ax.set_ylabel("y")
-    if legend:
+    if legend: 
         ax.legend(fontsize="x-small", loc="upper right")
     ax = axs["Losses"]
-    # ax.axhline(0.05, c="slategray", linestyle="--")
-    ax.plot(metrics["loss"], c="C9", linewidth=2.0, label=r"train $\log(CL_s)$")
-    # ax.plot(metrics["test_loss"], c="C4", linewidth=2.0, label=r"test $\log(CL_s)$")
+    x_grid = epoch_grid[:batch_num+1]
+    ax.plot(epoch_grid[:batch_num+1], metrics["loss"], c="C9", linewidth=2.0, label=r"train")
+    ax.plot(epoch_grid[:batch_num+1], metrics["test_loss"], c="C4", linewidth=2.0, label=r"test")
     ax.set_yscale("log")
-    # ax.set_ylim(1e-4, 0.06)
     ax.set_xlim(0, maxN)
     ax.set_xlabel("epoch")
     ax.set_ylabel(r"loss value")
-    # if legend:
-    #    ax.legend(fontsize="x-small", loc="upper right")
+    if legend:
+        ax.legend(fontsize="x-small", loc="upper right")
 
     ax = axs["Metrics"]
     ax.plot(
+        x_grid,
         metrics["1-pull_width**2"],
         c="slategray",
         linewidth=2.0,
         label=r"$(1-\sigma_{\mathsf{nuisance}})^2$",
     )
-    ax.plot(metrics["mu_uncert"], c="steelblue", linewidth=2.0, label=r"$\sigma_\mu$")
-    ax.plot(metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
+    ax.plot(x_grid, metrics["mu_uncert"], c="steelblue", linewidth=2.0, label=r"$\sigma_\mu$")
+    ax.plot(x_grid, metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
     # ax.set_ylim(1e-4, 0.06)
     ax.set_xlim(0, maxN)
     ax.set_xlabel("epoch")
     ax.set_yscale("log")
-    ax.set_ylabel(r"metric value")
+    ax.set_ylabel(r"metric value (on test set)")
     if legend:
         ax.legend(fontsize="x-small", loc="upper right")
 
@@ -436,6 +438,8 @@ def first_epoch(
     metrics,
     maxN,
     this_batch,
+    epoch_grid,
+    batch_num,
     nn,
     bins,
     bandwidth,
@@ -448,6 +452,8 @@ def first_epoch(
         metrics=metrics,
         maxN=maxN,
         this_batch=this_batch,
+        batch_num=batch_num,
+        epoch_grid=epoch_grid,
         nn=nn,
         bins=bins,
         bandwidth=bandwidth,
@@ -466,6 +472,8 @@ def last_epoch(
     metrics,
     maxN,
     this_batch,
+    batch_num,
+    epoch_grid,
     nn,
     bins,
     bandwidth,
@@ -479,9 +487,12 @@ def last_epoch(
         metrics=metrics,
         maxN=maxN,
         this_batch=this_batch,
+        epoch_grid=epoch_grid,
+        batch_num=batch_num,
         nn=nn,
         bins=bins,
         bandwidth=bandwidth,
+        legend=False
     )
     plt.tight_layout()
     camera.snap()
@@ -504,6 +515,8 @@ def last_epoch(
         maxN=maxN,
         this_batch=this_batch,
         nn=nn,
+        epoch_grid=epoch_grid,
+        batch_num=batch_num,
         bins=bins,
         bandwidth=bandwidth,
         legend=True,
@@ -521,6 +534,8 @@ def per_epoch(
     metrics,
     maxN,
     this_batch,
+    epoch_grid,
+    batch_num,
     nn,
     bins,
     bandwidth,
@@ -533,9 +548,12 @@ def per_epoch(
         metrics=metrics,
         maxN=maxN,
         this_batch=this_batch,
+        epoch_grid=epoch_grid,
+        batch_num=batch_num,
         nn=nn,
         bins=bins,
         bandwidth=bandwidth,
+        legend=False,
     )
     plt.tight_layout()
     camera.snap()

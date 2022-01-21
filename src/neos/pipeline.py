@@ -4,9 +4,8 @@ __all__ = ("Pipeline",)
 
 import time
 from functools import partial
-from pprint import pprint
+import pprint
 from typing import Any, Callable, NamedTuple
-
 import jax.numpy as jnp
 import jaxopt
 import numpy.random as npr
@@ -17,6 +16,12 @@ from chex import Array
 from jax import jit
 from sklearn.model_selection import train_test_split
 
+from neos.utils import FormatPrinter, isnotebook
+
+in_jupyter = isnotebook()
+if in_jupyter:
+    from IPython import display
+    import matplotlib.pyplot as plt
 
 @partial(
     jit, static_argnames=["model", "return_mle_pars", "return_constrained_pars"]
@@ -132,7 +137,7 @@ class Pipeline(NamedTuple):
             split = train_test_split(
                 *self.data, test_size=self.test_size, random_state=self.random_state
             )
-            train, _ = split[::2], split[1::2]
+            train, test = split[::2], split[1::2]
 
             num_train = train[0].shape[0]
             num_complete_batches, leftover = divmod(num_train, self.batch_size)
@@ -151,7 +156,7 @@ class Pipeline(NamedTuple):
 
             batches = data_stream()
         else:
-
+            num_batches = 0
             def blank_data():
                 while True:
                     yield None
@@ -159,57 +164,80 @@ class Pipeline(NamedTuple):
             batches = blank_data()
 
         solver = jaxopt.OptaxSolver(
-            fun=pipeline, opt=optax.adam(self.learning_rate), has_aux=True
+            fun=pipeline, opt=optax.adam(self.learning_rate), has_aux=True, jit=True
         )
-        params, state = solver.init(self.init_pars)
+        state = solver.init_state(init_params = self.init_pars)
+        params = self.init_pars
 
         plot_kwargs = self.plot_setup(self)
 
-        metrics = {"CLs": [], "mu_uncert": [], "1-pull_width**2": [], "loss": []}
+        metrics = {"CLs": [], "mu_uncert": [], "1-pull_width**2": [], "loss": [], "test_loss": []}
         metric_keys = list(metrics.keys())
+        epoch_grid = jnp.linspace(0, self.num_epochs, num_batches*self.num_epochs)
         for epoch_num in range(self.num_epochs):
-            batch_data = next(batches)
-            print(f"epoch {epoch_num}: ", end="")
-            start = time.perf_counter()
-            params, state = solver.update(params=params, state=state, data=batch_data)
-            end = time.perf_counter()
-            t = end - start
-            print(f"took {t:.4f}s. state:")
-            pprint(state.aux)
-            for key in state.aux:
-                if key in metric_keys:
-                    metrics[key].append(state.aux[key])
-                else:
-                    metrics[key] = state.aux[key]
+            print(f"epoch {epoch_num}: {num_batches} batches")
+            for batch_num in range(num_batches):
+                print(f"batch {batch_num+1}/{num_batches}:")
+                batch_data = next(batches)
+                start = time.perf_counter()
+                params, state = solver.update(params=params, state=state, data=batch_data)
+                end = time.perf_counter()
+                test_loss, test_metrics = pipeline(pars=params, data=test)
+                t = end - start
+                
+                for key in test_metrics:
+                    if key == 'loss':
+                        metrics["loss"].append(state.aux[key])
+                        metrics["test_loss"].append(test_loss)
+                    else:
+                        if key in metric_keys:
+                            metrics[key].append(test_metrics[key])
+                        else:
+                            metrics[key] = test_metrics[key]
+                    
+                if in_jupyter:
+                    display.clear_output(wait=True)
+                l = state.aux['loss']
+                print(f"epoch {epoch_num}: {num_batches} batches")
+                print(f"batch {batch_num+1}/{num_batches} took {t:.4f}s.")
+                print(f'batch loss: {l}')
+                print('test metrics:')
+                FormatPrinter({float: "%.3f", int: "%06X"}).pprint(test_metrics)
 
-            if epoch_num == 0:
-                plot_kwargs["camera"] = self.first_epoch_callback(
-                    params,
-                    this_batch=batch_data,
-                    metrics=metrics,
-                    maxN=self.num_epochs,
-                    **self.yield_kwargs,
-                    **plot_kwargs,
-                )
-            elif epoch_num == self.num_epochs - 1:
-                plot_kwargs["camera"] = self.last_epoch_callback(
-                    params,
-                    this_batch=batch_data,
-                    metrics=metrics,
-                    maxN=self.num_epochs,
-                    pipeline=self,
-                    **self.yield_kwargs,
-                    **plot_kwargs,
-                )
-            else:
-                plot_kwargs["camera"] = self.per_epoch_callback(
-                    params,
-                    this_batch=batch_data,
-                    metrics=metrics,
-                    maxN=self.num_epochs,
-                    **self.yield_kwargs,
-                    **plot_kwargs,
-                )
+                if batch_num+epoch_num == 0:
+                    plot_kwargs["camera"] = self.first_epoch_callback(
+                        params,
+                        this_batch=test,
+                        metrics=metrics,
+                        maxN=self.num_epochs,
+                        batch_num=batch_num,
+                        epoch_grid=epoch_grid,
+                        **self.yield_kwargs,
+                        **plot_kwargs,
+                    )
+                elif batch_num+epoch_num == num_batches-1+self.num_epochs-1:
+                    plot_kwargs["camera"] = self.last_epoch_callback(
+                        params,
+                        this_batch=test,
+                        metrics=metrics,
+                        maxN=self.num_epochs,
+                        batch_num=batch_num+(epoch_num*num_batches),
+                        epoch_grid=epoch_grid,
+                        pipeline=self,
+                        **self.yield_kwargs,
+                        **plot_kwargs,
+                    )
+                else:
+                    plot_kwargs["camera"] = self.per_epoch_callback(
+                        params,
+                        this_batch=test,
+                        metrics=metrics,
+                        maxN=self.num_epochs,
+                        batch_num=batch_num+(epoch_num*num_batches),
+                        epoch_grid=epoch_grid,
+                        **self.yield_kwargs,
+                        **plot_kwargs,
+                    )
         if self.animate:
             plot_kwargs["camera"].animate().save(
                 f"{self.animationname}", writer="imagemagick", fps=9
