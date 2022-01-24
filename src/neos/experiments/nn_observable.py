@@ -238,6 +238,7 @@ def plot(
     batch_num,
     legend=False,
     reflect=False,
+    histlim=55,
 ):
     if "Data space" in axs:
         ax = axs["Data space"]
@@ -276,7 +277,7 @@ def plot(
         ax.set_xlabel("x")
         ax.set_ylabel("y")
         if legend:
-            ax.legend(fontsize="x-small", loc="upper right")
+            ax.legend(fontsize="x-small", loc="upper right", fancybox=True)
     if "Losses" in axs:
         ax = axs["Losses"]
         x_grid = epoch_grid[: batch_num + 1]
@@ -299,7 +300,7 @@ def plot(
         ax.set_xlabel("epoch")
         ax.set_ylabel(r"loss value")
         if legend:
-            ax.legend(fontsize="x-small", loc="upper right")
+            ax.legend(fontsize="x-small", loc="upper right", fancybox=True)
 
     if "Metrics" in axs:
         ax = axs["Metrics"]
@@ -327,13 +328,13 @@ def plot(
             label=r"$\sigma_\mu$",
         )
         ax.plot(x_grid, metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
-        # ax.set_ylim(1e-4, 0.06)
+        ax.set_ylim(1e-7, 1e-0)
         ax.set_xlim(0, maxN)
         ax.set_xlabel("epoch")
         ax.set_yscale("log")
         ax.set_ylabel(r"metric value (on test set)")
         if legend:
-            ax.legend(fontsize="x-small", loc="upper right")
+            ax.legend(fontsize="x-small", loc="upper right", fancybox=True)
     if "Histogram model" in axs:
         ax = axs["Histogram model"]
         s, b, bup, bdown = metrics["yields"]
@@ -362,6 +363,7 @@ def plot(
         )
         ax.set_ylabel("frequency")
         ax.set_xlabel("interval over nn output")
+        ax.set_ylim(0,histlim)
 
         if legend:
             # Draw legend if we need
@@ -387,7 +389,7 @@ def plot(
                 colors="black",
                 linestyles="dotted",
                 label=r"$\pm$bandwidth",
-                alpha=0.6
+                alpha=0.9
             )
             # write text in the middle of the vertical lines with the value of the bandwidth
             ratio = bandwidth / width
@@ -398,7 +400,7 @@ def plot(
                 ha="center",
                 va="center",
                 size="x-small",
-                alpha=0.6
+                alpha=0.9
             )
 
             axins.set_xlim(*xlim)
@@ -406,7 +408,7 @@ def plot(
             handles, labels = a, list(b)#ax.get_legend_handles_labels()
             handles1, labels1 = axins.get_legend_handles_labels()
             ax.legend(
-                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
+                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small", fancybox=True
             )
     
     if "Nuisance pull" in axs:
@@ -512,7 +514,7 @@ def plot(
             handles, labels = ax.get_legend_handles_labels()
             handles1, labels1 = axins.get_legend_handles_labels()
             ax.legend(
-                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
+                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small", fancybox=True
             )
 
 
@@ -529,6 +531,7 @@ def first_epoch(
     nn,
     bins,
     bandwidth,
+    histlim,
     **kwargs,
 ):
     plot(
@@ -544,6 +547,7 @@ def first_epoch(
         bins=bins,
         bandwidth=bandwidth,
         legend=True,
+        histlim=histlim
     )
     plt.tight_layout()
     camera.snap()
@@ -564,6 +568,7 @@ def last_epoch(
     bins,
     bandwidth,
     pipeline,
+    histlim,
     **kwargs,
 ):
     plot(
@@ -578,6 +583,7 @@ def last_epoch(
         nn=nn,
         bins=bins,
         bandwidth=bandwidth,
+        histlim=histlim,
         legend=False,
     )
     plt.tight_layout()
@@ -597,7 +603,7 @@ def last_epoch(
 
     for label, ax in axs2.items():
         ax.set_title(label, fontstyle="italic")
-    axins2 = axs2["Histogram model"].inset_axes([0.3, 0.79, 0.3, 0.2])
+    axins2 = axs2["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
     axins2.axis("off")
     plot(
         axs=axs2,
@@ -612,6 +618,7 @@ def last_epoch(
         bins=bins,
         bandwidth=bandwidth,
         legend=True,
+        histlim=histlim,
     )
     plt.tight_layout()
     fig2.savefig(f"{pipeline.plot_name}")
@@ -631,6 +638,7 @@ def per_epoch(
     nn,
     bins,
     bandwidth,
+    histlim,
     **kwargs,
 ):
     plot(
@@ -646,6 +654,7 @@ def per_epoch(
         bins=bins,
         bandwidth=bandwidth,
         legend=False,
+        histlim=histlim
     )
     plt.tight_layout()
     camera.snap()
@@ -666,6 +675,7 @@ def plot_setup(pipeline):
             "xtick.major.size": 3,
             "ytick.major.size": 3,
             "legend.fontsize": 11,
+            "legend.fancybox": True,
         }
     )
 
@@ -687,7 +697,7 @@ def plot_setup(pipeline):
     for label, ax in axs.items():
         ax.set_title(label, fontstyle="italic")
     #axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
-    axins = axs["Histogram model"].inset_axes([0.3, 0.79, 0.3, 0.2])
+    axins = axs["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
     axins.axis("off")
     ax_cpy = axs
     axins_cpy = axins

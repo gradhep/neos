@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from sklearn import metrics
+
 __all__ = ("Pipeline",)
 
 import time
@@ -91,7 +93,8 @@ class Pipeline(NamedTuple):
     animate: bool = True
     plot_name: str = "neos_demo.png"
     animation_name: str = "neos_demo.gif"
-    plot_title: str | None = None
+    plot_title: str | None = None,
+    plot_kwargs: dict | None = None
 
     def run(self):
         pyhf.set_backend("jax", default=True)
@@ -137,7 +140,6 @@ class Pipeline(NamedTuple):
             loss = self.loss(state)
             del state["data"]
             del state["nn"]
-            del state["pars"]
             state["loss"] = loss
             return loss, state
 
@@ -187,6 +189,7 @@ class Pipeline(NamedTuple):
             "loss": [],
             "test_loss": [],
             "pull": [],
+            "pars": {}
         }
         metric_keys = list(metrics.keys())
         epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
@@ -207,6 +210,8 @@ class Pipeline(NamedTuple):
                     if key == "loss":
                         metrics["loss"].append(state.aux[key])
                         metrics["test_loss"].append(test_loss)
+                    elif key == "pars":
+                        continue
                     else:
                         if key in metric_keys:
                             metrics[key].append(test_metrics[key])
@@ -223,13 +228,19 @@ class Pipeline(NamedTuple):
                 print("metrics evaluated on test set:")
                 for k, v in test_metrics.items():
                     if k == "yields":
-                        print("yields")
-                        print('  ', end='')
-                        for label, y in zip(['s','b','bup','bdown'], v):
-                            if label=="bdown":
-                                print(f'{label} = {y[0]:.3g}')
-                            else:
-                                print(f'{label} = {y[0]:.3g}, ', end='')
+                        print("yields:")
+                        for label, yields in zip(['s','b','bup','bdown'], v):
+                            print('  ', end='')
+                            print(f'{label} = [', end='')
+                            for i, count in enumerate(yields):
+                                if i==len(yields)-1:
+                                    print(f'{count:.3g}', end='')
+                                else:
+                                    print(f'{count:.3g}, ', end='')
+                            print(']')
+                                    
+                    elif k == "pars":
+                        continue
                     else:
                         print(f'{k} = {v:.3g}')
                 print()
@@ -246,6 +257,7 @@ class Pipeline(NamedTuple):
                         nn=self.nn,
                         **self.yield_kwargs,
                         **plot_kwargs,
+                        **self.plot_kwargs
                     )
                 elif batch_num + epoch_num == num_batches - 1 + self.num_epochs - 1:
                     plot_kwargs["camera"] = self.last_epoch_callback(
@@ -259,6 +271,7 @@ class Pipeline(NamedTuple):
                         pipeline=self,
                         **self.yield_kwargs,
                         **plot_kwargs,
+                        **self.plot_kwargs,
                     )
                 else:
                     plot_kwargs["camera"] = self.per_epoch_callback(
@@ -271,8 +284,15 @@ class Pipeline(NamedTuple):
                         epoch_grid=epoch_grid,
                         **self.yield_kwargs,
                         **plot_kwargs,
+                        **self.plot_kwargs,
                     )
+            metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
         if self.animate:
-            plot_kwargs["camera"].animate().save(
+            ani = plot_kwargs["camera"].animate()
+            ani.save(
                 f"{self.animation_name}", writer="imagemagick", fps=10
             )
+            return ani, metrics
+        return metrics
+        
+        
