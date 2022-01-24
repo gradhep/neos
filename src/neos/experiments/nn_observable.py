@@ -220,9 +220,8 @@ def bar_plot(
     ax.set_xticks(range(len(labels)))
     ax.set_xticklabels(labels)
 
-    # Draw legend if we need
-    if legend:
-        ax.legend(bars, data.keys(), fontsize="x-small")
+    return bars, data.keys()
+    
 
 
 def plot(
@@ -240,222 +239,281 @@ def plot(
     legend=False,
     reflect=False,
 ):
-    ax = axs["Data space"]
-    g = np.mgrid[-5:5:101j, -5:5:101j]
-    if jnp.inf in bins:
-        levels = bins[1:-1]  # infinite
-    else:
-        levels = bins
-    ax.contourf(
-        g[0],
-        g[1],
-        nn(network, np.moveaxis(g, 0, -1)).reshape(101, 101, 1)[:, :, 0],
-        levels=levels,
-        cmap="binary",
-    )
-    ax.contour(
-        g[0],
-        g[1],
-        nn(network, np.moveaxis(g, 0, -1)).reshape(101, 101, 1)[:, :, 0],
-        colors="w",
-        levels=levels,
-    )
-    sig, bkg_nom, bkg_up, bkg_down = this_batch
-    # should definitely not have to repeat this every time lmao
-    ax.scatter(sig[:, 0], sig[:, 1], alpha=0.3, c="C9", label="signal")
-    ax.scatter(
-        bkg_up[:, 0], bkg_up[:, 1], alpha=0.1, c="orangered", marker=6, label="bkg up"
-    )
-    ax.scatter(
-        bkg_down[:, 0], bkg_down[:, 1], alpha=0.1, c="gold", marker=7, label="bkg down"
-    )
-    ax.scatter(bkg_nom[:, 0], bkg_nom[:, 1], alpha=0.3, c="C1", label="bkg")
-
-    ax.set_xlim(-5, 5)
-    ax.set_ylim(-5, 5)
-    ax.set_xlabel("x")
-    ax.set_ylabel("y")
-    if legend:
-        ax.legend(fontsize="x-small", loc="upper right")
-    ax = axs["Losses"]
-    x_grid = epoch_grid[: batch_num + 1]
-    ax.plot(
-        epoch_grid[: batch_num + 1],
-        metrics["loss"],
-        c="C9",
-        linewidth=2.0,
-        label=r"train",
-    )
-    ax.plot(
-        epoch_grid[: batch_num + 1],
-        metrics["test_loss"],
-        c="C4",
-        linewidth=2.0,
-        label=r"test",
-    )
-    ax.set_yscale("log")
-    ax.set_xlim(0, maxN)
-    ax.set_xlabel("epoch")
-    ax.set_ylabel(r"loss value")
-    if legend:
-        ax.legend(fontsize="x-small", loc="upper right")
-
-    ax = axs["Metrics"]
-    ax.plot(
-        x_grid,
-        metrics["1-pull_width**2"],
-        c="slategray",
-        linewidth=2.0,
-        label=r"$(1-\sigma_{\mathsf{nuisance}})^2$",
-    )
-    ax.plot(
-        x_grid,
-        metrics["mu_uncert"],
-        c="steelblue",
-        linewidth=2.0,
-        label=r"$\sigma_\mu$",
-    )
-    ax.plot(x_grid, metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
-    # ax.set_ylim(1e-4, 0.06)
-    ax.set_xlim(0, maxN)
-    ax.set_xlabel("epoch")
-    ax.set_yscale("log")
-    ax.set_ylabel(r"metric value (on test set)")
-    if legend:
-        ax.legend(fontsize="x-small", loc="upper right")
-
-    ax = axs["Histogram model"]
-    s, b, bup, bdown = metrics["yields"]
-
-    if jnp.inf in bins:
-        noinf = bins[1:-1]
-        bin_width = 1 / (len(noinf) - 1)
-        centers = noinf[:-1] + np.diff(noinf) / 2.0
-        centers = jnp.array([noinf[0] - bin_width, *centers, noinf[-1] + bin_width])
-
-    dct = {
-        "signal": s,
-        "bkg up": bup,
-        "bkg": b,
-        "bkg down": bdown,
-    }
-
-    bar_plot(
-        ax,
-        dct,
-        colors=["C9", "orangered", "C1", "gold"],
-        total_width=0.8,
-        single_width=1,
-        legend=legend,
-        bins=bins,
-    )
-    ax.set_ylabel("frequency")
-    ax.set_xlabel("interval over nn output")
-
-    ax = axs["Nuisance pull"]
-
-    pulls = metrics["pull"]
-    pullerr = metrics["pull_width"]
-
-    ax.set_ylabel(r"$(\theta - \hat{\theta})\,/ \Delta \theta$", fontsize=18)
-
-    # draw the +/- 2.0 horizontal lines
-    ax.hlines([-2, 2], -0.5, len(pulls) - 0.5, colors="black", linestyles="dotted")
-    # draw the +/- 1.0 horizontal lines
-    ax.hlines([-1, 1], -0.5, len(pulls) - 0.5, colors="black", linestyles="dashdot")
-    # draw the +/- 2.0 sigma band
-    ax.fill_between([-0.5, len(pulls) - 0.5], [-2, -2], [2, 2], facecolor="yellow")
-    # drawe the +/- 1.0 sigma band
-    ax.fill_between([-0.5, len(pulls) - 0.5], [-1, -1], [1, 1], facecolor="green")
-    # draw a horizontal line at pull=0.0
-    ax.hlines([0], -0.5, len(pulls) - 0.5, colors="black", linestyles="dashed")
-
-    ax.scatter(range(len(pulls)), pulls, color="black")
-    # and their uncertainties
-    ax.errorbar(
-        range(len(pulls)),
-        pulls,
-        color="black",
-        xerr=0,
-        yerr=pullerr,
-        marker=".",
-        fmt="none",
-    )
-
-    ax = axs["Example KDE"]
-    b_data = bkg_nom
-    d = np.array(nn(network, b_data).ravel().tolist())
-    kde = make_kde(d, bandwidth)
-    yields = b
-    ls = [-1, 2]
-    x = np.linspace(ls[0], ls[1], 300)
-    db = jnp.array(jnp.diff(bins), float)  # bin spacing
-    yields = yields / db / yields.sum(axis=0)  # normalize to bin width
-    if jnp.inf in bins:
-        pbins = [ls[0], *noinf, ls[1]]
-    else:
-        pbins = bins
-    ax.stairs(yields, pbins, label="KDE hist", color="C1")
-    if reflect:
-        ax.plot(x, 2 * jnp.abs(kde(x)), label="KDE", color="C0")
-    else:
-        ax.plot(x, kde(x), label="KDE", color="C0")
-
-    ax.set_xlim(*ls)
-
-    # rug plot of the data
-    ax.plot(
-        d,
-        jnp.zeros_like(d) - 0.01,
-        "|",
-        linewidth=3,
-        alpha=0.4,
-        color="black",
-        label="data",
-    )
-
-    if legend:
+    if "Data space" in axs:
+        ax = axs["Data space"]
+        g = np.mgrid[-5:5:101j, -5:5:101j]
         if jnp.inf in bins:
-
-            width = jnp.diff(noinf)[0]
+            levels = bins[1:-1]  # infinite
         else:
-            width = jnp.diff(bins)[0]
-        xlim = (
-            [(width / 2) - (1.1 * bandwidth), (width / 2) + (1.1 * bandwidth)]
-            if (width / 2) - bandwidth < 0
-            else [-width / 3, width + width / 3]
+            levels = bins
+        ax.contourf(
+            g[0],
+            g[1],
+            nn(network, np.moveaxis(g, 0, -1)).reshape(101, 101, 1)[:, :, 0],
+            levels=levels,
+            cmap="binary",
         )
-        axins.stairs([1], [0, width], color="C1")
-        y = jnp.linspace(xlim[0], xlim[1], 300)
-        demo = jsp.stats.norm.pdf(y, loc=width / 2, scale=bandwidth)
-        axins.plot(y, demo / max(demo), color="C0", linestyle="dashed", label="kernel")
-        # draw two vertical lines at ((width/2)-bandwidth)/2 and ((width/2)+bandwidth)/2
-        axins.vlines(
-            [(width / 2) - bandwidth, (width / 2) + bandwidth],
-            0,
-            1,
-            colors="black",
-            linestyles="dotted",
-            label=r"$\pm$bandwidth",
+        ax.contour(
+            g[0],
+            g[1],
+            nn(network, np.moveaxis(g, 0, -1)).reshape(101, 101, 1)[:, :, 0],
+            colors="w",
+            levels=levels,
         )
-        # write text in the middle of the vertical lines with the value of the bandwidth
-        ratio = bandwidth / width
-        axins.text(
-            width / 2,
-            -0.3,
-            r"$\mathsf{\frac{bandwidth}{bin\,width}}=$" + f"{ratio:.2f}",
-            ha="center",
-            va="center",
-            size="x-small",
+        sig, bkg_nom, bkg_up, bkg_down = this_batch
+        # should definitely not have to repeat this every time lmao
+        ax.scatter(sig[:, 0], sig[:, 1], alpha=0.3, c="C9", label="signal")
+        ax.scatter(
+            bkg_up[:, 0], bkg_up[:, 1], alpha=0.1, c="orangered", marker=6, label="bkg up"
+        )
+        ax.scatter(
+            bkg_down[:, 0], bkg_down[:, 1], alpha=0.1, c="gold", marker=7, label="bkg down"
+        )
+        ax.scatter(bkg_nom[:, 0], bkg_nom[:, 1], alpha=0.3, c="C1", label="bkg")
+
+        ax.set_xlim(-5, 5)
+        ax.set_ylim(-5, 5)
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
+        if legend:
+            ax.legend(fontsize="x-small", loc="upper right")
+    if "Losses" in axs:
+        ax = axs["Losses"]
+        x_grid = epoch_grid[: batch_num + 1]
+        ax.plot(
+            epoch_grid[: batch_num + 1],
+            metrics["loss"],
+            c="C9",
+            linewidth=2.0,
+            label=r"train",
+        )
+        ax.plot(
+            epoch_grid[: batch_num + 1],
+            metrics["test_loss"],
+            c="C4",
+            linewidth=2.0,
+            label=r"test",
+        )
+        ax.set_yscale("log")
+        ax.set_xlim(0, maxN)
+        ax.set_xlabel("epoch")
+        ax.set_ylabel(r"loss value")
+        if legend:
+            ax.legend(fontsize="x-small", loc="upper right")
+
+    if "Metrics" in axs:
+        ax = axs["Metrics"]
+        ax.plot(
+            x_grid,
+            metrics["1-pull_width**2"],
+            c="slategray",
+            linewidth=2.0,
+            label=r"$(1-\sigma_{\mathsf{nuisance}})^2$",
+            #linestyle=":"
+        )
+        ax.plot(
+            x_grid,
+            np.array(metrics["pull"])**2,
+            c="C2",
+            linewidth=2.0,
+            label=r"(nuisance pull)$^2$",
+            #linestyle=':'
+        )
+        ax.plot(
+            x_grid,
+            metrics["mu_uncert"],
+            c="steelblue",
+            linewidth=2.0,
+            label=r"$\sigma_\mu$",
+        )
+        ax.plot(x_grid, metrics["CLs"], c="C9", linewidth=2, label=r"$CL_s$")
+        # ax.set_ylim(1e-4, 0.06)
+        ax.set_xlim(0, maxN)
+        ax.set_xlabel("epoch")
+        ax.set_yscale("log")
+        ax.set_ylabel(r"metric value (on test set)")
+        if legend:
+            ax.legend(fontsize="x-small", loc="upper right")
+    if "Histogram model" in axs:
+        ax = axs["Histogram model"]
+        s, b, bup, bdown = metrics["yields"]
+
+        if jnp.inf in bins:
+            noinf = bins[1:-1]
+            bin_width = 1 / (len(noinf) - 1)
+            centers = noinf[:-1] + np.diff(noinf) / 2.0
+            centers = jnp.array([noinf[0] - bin_width, *centers, noinf[-1] + bin_width])
+
+        dct = {
+            "signal": s,
+            "bkg up": bup,
+            "bkg": b,
+            "bkg down": bdown,
+        }
+
+        a, b = bar_plot(
+            ax,
+            dct,
+            colors=["C9", "orangered", "C1", "gold"],
+            total_width=0.8,
+            single_width=1,
+            legend=legend,
+            bins=bins,
+        )
+        ax.set_ylabel("frequency")
+        ax.set_xlabel("interval over nn output")
+
+        if legend:
+            # Draw legend if we need
+            #ax.legend(a, b, fontsize="x-small")
+            if jnp.inf in bins:
+                width = jnp.diff(noinf)[0]
+            else:
+                width = jnp.diff(bins)[0]
+            xlim = (
+                [(width / 2) - (1.1 * bandwidth), (width / 2) + (1.1 * bandwidth)]
+                if (width / 2) - bandwidth < 0
+                else [-width / 3, width + width / 3]
+            )
+            axins.stairs([1], [0, width], color="C1", alpha=0.6)
+            y = jnp.linspace(xlim[0], xlim[1], 300)
+            demo = jsp.stats.norm.pdf(y, loc=width / 2, scale=bandwidth)
+            axins.plot(y, demo / max(demo), color="C0", linestyle="dashed", label="kernel")
+            # draw two vertical lines at ((width/2)-bandwidth)/2 and ((width/2)+bandwidth)/2
+            axins.vlines(
+                [(width / 2) - bandwidth, (width / 2) + bandwidth],
+                0,
+                1,
+                colors="black",
+                linestyles="dotted",
+                label=r"$\pm$bandwidth",
+                alpha=0.6
+            )
+            # write text in the middle of the vertical lines with the value of the bandwidth
+            ratio = bandwidth / width
+            axins.text(
+                width / 2,
+                -0.3,
+                r"$\mathsf{\frac{bandwidth}{bin\,width}}=$" + f"{ratio:.2f}",
+                ha="center",
+                va="center",
+                size="x-small",
+                alpha=0.6
+            )
+
+            axins.set_xlim(*xlim)
+
+            handles, labels = a, list(b)#ax.get_legend_handles_labels()
+            handles1, labels1 = axins.get_legend_handles_labels()
+            ax.legend(
+                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
+            )
+    
+    if "Nuisance pull" in axs:
+        ax = axs["Nuisance pull"]
+
+        pulls = metrics["pull"]
+        pullerr = metrics["pull_width"]
+
+        ax.set_ylabel(r"$(\theta - \hat{\theta})\,/ \Delta \theta$", fontsize=18)
+
+        # draw the +/- 2.0 horizontal lines
+        ax.hlines([-2, 2], -0.5, len(pulls) - 0.5, colors="black", linestyles="dotted")
+        # draw the +/- 1.0 horizontal lines
+        ax.hlines([-1, 1], -0.5, len(pulls) - 0.5, colors="black", linestyles="dashdot")
+        # draw the +/- 2.0 sigma band
+        ax.fill_between([-0.5, len(pulls) - 0.5], [-2, -2], [2, 2], facecolor="yellow")
+        # drawe the +/- 1.0 sigma band
+        ax.fill_between([-0.5, len(pulls) - 0.5], [-1, -1], [1, 1], facecolor="green")
+        # draw a horizontal line at pull=0.0
+        ax.hlines([0], -0.5, len(pulls) - 0.5, colors="black", linestyles="dashed")
+
+        ax.scatter(range(len(pulls)), pulls, color="black")
+        # and their uncertainties
+        ax.errorbar(
+            range(len(pulls)),
+            pulls,
+            color="black",
+            xerr=0,
+            yerr=pullerr,
+            marker=".",
+            fmt="none",
+        )
+    if "Example KDE" in axs:
+        ax = axs["Example KDE"]
+        b_data = bkg_nom
+        d = np.array(nn(network, b_data).ravel().tolist())
+        kde = make_kde(d, bandwidth)
+        yields = b
+        ls = [-1, 2]
+        x = np.linspace(ls[0], ls[1], 300)
+        db = jnp.array(jnp.diff(bins), float)  # bin spacing
+        yields = yields / db / yields.sum(axis=0)  # normalize to bin width
+        if jnp.inf in bins:
+            pbins = [ls[0], *noinf, ls[1]]
+        else:
+            pbins = bins
+        ax.stairs(yields, pbins, label="KDE hist", color="C1")
+        if reflect:
+            ax.plot(x, 2 * jnp.abs(kde(x)), label="KDE", color="C0")
+        else:
+            ax.plot(x, kde(x), label="KDE", color="C0")
+
+        ax.set_xlim(*ls)
+
+        # rug plot of the data
+        ax.plot(
+            d,
+            jnp.zeros_like(d) - 0.01,
+            "|",
+            linewidth=3,
+            alpha=0.4,
+            color="black",
+            label="data",
         )
 
-        axins.set_xlim(*xlim)
+        if legend:
+            if jnp.inf in bins:
 
-        handles, labels = ax.get_legend_handles_labels()
-        handles1, labels1 = axins.get_legend_handles_labels()
-        ax.legend(
-            handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
-        )
+                width = jnp.diff(noinf)[0]
+            else:
+                width = jnp.diff(bins)[0]
+            xlim = (
+                [(width / 2) - (1.1 * bandwidth), (width / 2) + (1.1 * bandwidth)]
+                if (width / 2) - bandwidth < 0
+                else [-width / 3, width + width / 3]
+            )
+            axins.stairs([1], [0, width], color="C1")
+            y = jnp.linspace(xlim[0], xlim[1], 300)
+            demo = jsp.stats.norm.pdf(y, loc=width / 2, scale=bandwidth)
+            axins.plot(y, demo / max(demo), color="C0", linestyle="dashed", label="kernel")
+            # draw two vertical lines at ((width/2)-bandwidth)/2 and ((width/2)+bandwidth)/2
+            axins.vlines(
+                [(width / 2) - bandwidth, (width / 2) + bandwidth],
+                0,
+                1,
+                colors="black",
+                linestyles="dotted",
+                label=r"$\pm$bandwidth",
+            )
+            # write text in the middle of the vertical lines with the value of the bandwidth
+            ratio = bandwidth / width
+            axins.text(
+                width / 2,
+                -0.3,
+                r"$\mathsf{\frac{bandwidth}{bin\,width}}=$" + f"{ratio:.2f}",
+                ha="center",
+                va="center",
+                size="x-small",
+            )
+
+            axins.set_xlim(*xlim)
+
+            handles, labels = ax.get_legend_handles_labels()
+            handles1, labels1 = axins.get_legend_handles_labels()
+            ax.legend(
+                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small"
+            )
 
 
 def first_epoch(
@@ -524,16 +582,22 @@ def last_epoch(
     )
     plt.tight_layout()
     camera.snap()
+    # fig2, axs2 = plt.subplot_mosaic(
+    #     [
+    #         ["Data space", "Histogram model", "Example KDE"],
+    #         ["Losses", "Metrics", "Nuisance pull"],
+    #     ]
+    # )
     fig2, axs2 = plt.subplot_mosaic(
         [
-            ["Data space", "Histogram model", "Example KDE"],
-            ["Losses", "Metrics", "Nuisance pull"],
+            ["Data space", "Histogram model"],
+            ["Losses", "Metrics"],
         ]
     )
 
     for label, ax in axs2.items():
         ax.set_title(label, fontstyle="italic")
-    axins2 = axs2["Example KDE"].inset_axes([0.01, 0.79, 0.3, 0.2])
+    axins2 = axs2["Histogram model"].inset_axes([0.3, 0.79, 0.3, 0.2])
     axins2.axis("off")
     plot(
         axs=axs2,
@@ -597,7 +661,7 @@ def plot_setup(pipeline):
             "axes.linewidth": 1.2,
             "xtick.labelsize": 13,
             "ytick.labelsize": 13,
-            "figure.figsize": [16.0, 9.0],
+            "figure.figsize": [10.0, 10.0],
             "font.size": 13,
             "xtick.major.size": 3,
             "ytick.major.size": 3,
@@ -605,25 +669,31 @@ def plot_setup(pipeline):
         }
     )
 
-    plt.rc("figure", dpi=120)
+    plt.rc("figure", dpi=150)
 
+    # fig, axs = plt.subplot_mosaic(
+    #     [
+    #         ["Data space", "Histogram model", "Example KDE"],
+    #         ["Losses", "Metrics", "Nuisance pull"],
+    #     ]
+    # )
     fig, axs = plt.subplot_mosaic(
         [
-            ["Data space", "Histogram model", "Example KDE"],
-            ["Losses", "Metrics", "Nuisance pull"],
+            ["Data space", "Histogram model"],
+            ["Losses", "Metrics"],
         ]
     )
 
     for label, ax in axs.items():
         ax.set_title(label, fontstyle="italic")
-    axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
-    axins = axs["Example KDE"].inset_axes([0.01, 0.79, 0.3, 0.2])
+    #axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
+    axins = axs["Histogram model"].inset_axes([0.3, 0.79, 0.3, 0.2])
     axins.axis("off")
     ax_cpy = axs
     axins_cpy = axins
     if pipeline.animate:
         camera = Camera(fig)
-    plt.suptitle(pipeline.plot_title, fontweight="bold")
+    plt.suptitle(pipeline.plot_title, fontsize='x-large')
     return dict(
         camera=camera, axs=axs, axins=axins, ax_cpy=ax_cpy, axins_cpy=axins_cpy, fig=fig
     )

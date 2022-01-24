@@ -130,7 +130,7 @@ class Pipeline(NamedTuple):
                     for k in model.config.par_order
                     if model.config.param_set(k).constrained
                 ]
-            )
+            )[0]
             state["data"] = data
             state["pars"] = pars
             state["nn"] = self.nn
@@ -186,11 +186,12 @@ class Pipeline(NamedTuple):
             "1-pull_width**2": [],
             "loss": [],
             "test_loss": [],
+            "pull": [],
         }
         metric_keys = list(metrics.keys())
         epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
         for epoch_num in range(self.num_epochs):
-            print(f"epoch {epoch_num}: {num_batches} batches")
+            print(f"epoch {epoch_num}/{self.num_epochs}: {num_batches} batches")
             for batch_num in range(num_batches):
                 print(f"batch {batch_num+1}/{num_batches}:")
                 batch_data = next(batches)
@@ -215,11 +216,24 @@ class Pipeline(NamedTuple):
                 if in_jupyter:
                     display.clear_output(wait=True)
                 l = state.aux["loss"]
-                print(f"epoch {epoch_num}: {num_batches} batches")
+                print(f"epoch {epoch_num}/{self.num_epochs}: {num_batches} batches")
                 print(f"batch {batch_num+1}/{num_batches} took {t:.4f}s.")
-                print(f"batch loss: {l}")
-                print("test metrics:")
-                FormatPrinter({float: "%.3f", int: "%06X"}).pprint(test_metrics)
+                print()
+                print(f"batch loss: {l:.3g}")
+                print("metrics evaluated on test set:")
+                for k, v in test_metrics.items():
+                    if k == "yields":
+                        print("yields")
+                        print('  ', end='')
+                        for label, y in zip(['s','b','bup','bdown'], v):
+                            if label=="bdown":
+                                print(f'{label} = {y[0]:.3g}')
+                            else:
+                                print(f'{label} = {y[0]:.3g}, ', end='')
+                    else:
+                        print(f'{k} = {v:.3g}')
+                print()
+            
 
                 if batch_num + epoch_num == 0:
                     plot_kwargs["camera"] = self.first_epoch_callback(
