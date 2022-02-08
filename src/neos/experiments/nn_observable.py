@@ -98,6 +98,7 @@ def nn_summary_stat(
     bkg_scale=10,
     LUMI=10,
     return_preds=False,
+    use_kde=True,
 ):
     s_data, b_nom_data, b_up_data, b_down_data = data
 
@@ -109,30 +110,39 @@ def nn_summary_stat(
     )
 
     num_points = len(s_data)
-
-    yields = s, b_nom, b_up, b_down = [
-        relaxed.hist(nn_s, bins, bandwidth, reflect_infinities=reflect)
-        * sig_scale
-        / num_points
-        * LUMI,
-        relaxed.hist(nn_b_nom, bins, bandwidth, reflect_infinities=reflect)
-        * bkg_scale
-        / num_points
-        * LUMI,
-        relaxed.hist(nn_b_up, bins, bandwidth, reflect_infinities=reflect)
-        * bkg_scale
-        / num_points
-        * LUMI,
-        relaxed.hist(
-            nn_b_down,
-            bins,
-            bandwidth,
-            reflect_infinities=reflect,
-        )
-        * bkg_scale
-        / num_points
-        * LUMI,
-    ]
+    if use_kde:
+        yields = s, b_nom, b_up, b_down = [
+            relaxed.hist(nn_s, bins, bandwidth, reflect_infinities=reflect)
+            * sig_scale
+            / num_points
+            * LUMI,
+            relaxed.hist(nn_b_nom, bins, bandwidth, reflect_infinities=reflect)
+            * bkg_scale
+            / num_points
+            * LUMI,
+            relaxed.hist(nn_b_up, bins, bandwidth, reflect_infinities=reflect)
+            * bkg_scale
+            / num_points
+            * LUMI,
+            relaxed.hist(
+                nn_b_down,
+                bins,
+                bandwidth,
+                reflect_infinities=reflect,
+            )
+            * bkg_scale
+            / num_points
+            * LUMI,
+        ]
+    elif not use_kde:
+        yields = [
+            np.histogram(nn_s, bins=bins)[0] * sig_scale / num_points * LUMI,
+            np.histogram(nn_b_nom, bins=bins)[0] * bkg_scale / num_points * LUMI,
+            np.histogram(nn_b_up, bins=bins)[0] * bkg_scale / num_points * LUMI,
+            np.histogram(nn_b_down, bins=bins)[0] * bkg_scale / num_points * LUMI,
+        ]
+    else:
+        raise ValueError("use_kde must be True or False")
     if return_preds:
         return yields, preds
     return yields
@@ -221,7 +231,6 @@ def bar_plot(
     ax.set_xticklabels(labels)
 
     return bars, data.keys()
-    
 
 
 def plot(
@@ -265,10 +274,20 @@ def plot(
         # should definitely not have to repeat this every time lmao
         ax.scatter(sig[:, 0], sig[:, 1], alpha=0.3, c="C9", label="signal")
         ax.scatter(
-            bkg_up[:, 0], bkg_up[:, 1], alpha=0.1, c="orangered", marker=6, label="bkg up"
+            bkg_up[:, 0],
+            bkg_up[:, 1],
+            alpha=0.1,
+            c="orangered",
+            marker=6,
+            label="bkg up",
         )
         ax.scatter(
-            bkg_down[:, 0], bkg_down[:, 1], alpha=0.1, c="gold", marker=7, label="bkg down"
+            bkg_down[:, 0],
+            bkg_down[:, 1],
+            alpha=0.1,
+            c="gold",
+            marker=7,
+            label="bkg down",
         )
         ax.scatter(bkg_nom[:, 0], bkg_nom[:, 1], alpha=0.3, c="C1", label="bkg")
 
@@ -310,15 +329,15 @@ def plot(
             c="slategray",
             linewidth=2.0,
             label=r"$(1-\sigma_{\mathsf{nuisance}})^2$",
-            #linestyle=":"
+            # linestyle=":"
         )
         ax.plot(
             x_grid,
-            np.array(metrics["pull"])**2,
+            np.array(metrics["pull"]) ** 2,
             c="C2",
             linewidth=2.0,
             label=r"(nuisance pull)$^2$",
-            #linestyle=':'
+            # linestyle=':'
         )
         ax.plot(
             x_grid,
@@ -363,11 +382,11 @@ def plot(
         )
         ax.set_ylabel("frequency")
         ax.set_xlabel("interval over nn output")
-        ax.set_ylim(0,histlim)
+        ax.set_ylim(0, histlim)
 
         if legend:
             # Draw legend if we need
-            #ax.legend(a, b, fontsize="x-small")
+            # ax.legend(a, b, fontsize="x-small")
             if jnp.inf in bins:
                 width = jnp.diff(noinf)[0]
             else:
@@ -380,7 +399,9 @@ def plot(
             axins.stairs([1], [0, width], color="C1", alpha=0.6)
             y = jnp.linspace(xlim[0], xlim[1], 300)
             demo = jsp.stats.norm.pdf(y, loc=width / 2, scale=bandwidth)
-            axins.plot(y, demo / max(demo), color="C0", linestyle="dashed", label="kernel")
+            axins.plot(
+                y, demo / max(demo), color="C0", linestyle="dashed", label="kernel"
+            )
             # draw two vertical lines at ((width/2)-bandwidth)/2 and ((width/2)+bandwidth)/2
             axins.vlines(
                 [(width / 2) - bandwidth, (width / 2) + bandwidth],
@@ -389,7 +410,7 @@ def plot(
                 colors="black",
                 linestyles="dotted",
                 label=r"$\pm$bandwidth",
-                alpha=0.9
+                alpha=0.9,
             )
             # write text in the middle of the vertical lines with the value of the bandwidth
             ratio = bandwidth / width
@@ -400,17 +421,21 @@ def plot(
                 ha="center",
                 va="center",
                 size="x-small",
-                alpha=0.9
+                alpha=0.9,
             )
 
             axins.set_xlim(*xlim)
 
-            handles, labels = a, list(b)#ax.get_legend_handles_labels()
+            handles, labels = a, list(b)  # ax.get_legend_handles_labels()
             handles1, labels1 = axins.get_legend_handles_labels()
             ax.legend(
-                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small", fancybox=True
+                handles + handles1,
+                labels + labels1,
+                loc="upper right",
+                fontsize="x-small",
+                fancybox=True,
             )
-    
+
     if "Nuisance pull" in axs:
         ax = axs["Nuisance pull"]
 
@@ -488,7 +513,9 @@ def plot(
             axins.stairs([1], [0, width], color="C1")
             y = jnp.linspace(xlim[0], xlim[1], 300)
             demo = jsp.stats.norm.pdf(y, loc=width / 2, scale=bandwidth)
-            axins.plot(y, demo / max(demo), color="C0", linestyle="dashed", label="kernel")
+            axins.plot(
+                y, demo / max(demo), color="C0", linestyle="dashed", label="kernel"
+            )
             # draw two vertical lines at ((width/2)-bandwidth)/2 and ((width/2)+bandwidth)/2
             axins.vlines(
                 [(width / 2) - bandwidth, (width / 2) + bandwidth],
@@ -514,7 +541,11 @@ def plot(
             handles, labels = ax.get_legend_handles_labels()
             handles1, labels1 = axins.get_legend_handles_labels()
             ax.legend(
-                handles + handles1, labels + labels1, loc="upper right", fontsize="x-small", fancybox=True
+                handles + handles1,
+                labels + labels1,
+                loc="upper right",
+                fontsize="x-small",
+                fancybox=True,
             )
 
 
@@ -547,10 +578,11 @@ def first_epoch(
         bins=bins,
         bandwidth=bandwidth,
         legend=True,
-        histlim=histlim
+        histlim=histlim,
     )
     plt.tight_layout()
-    camera.snap()
+    if camera is not None:
+        camera.snap()
     return camera
 
 
@@ -587,7 +619,8 @@ def last_epoch(
         legend=False,
     )
     plt.tight_layout()
-    camera.snap()
+    if camera is not None:
+        camera.snap()
     # fig2, axs2 = plt.subplot_mosaic(
     #     [
     #         ["Data space", "Histogram model", "Example KDE"],
@@ -654,10 +687,11 @@ def per_epoch(
         bins=bins,
         bandwidth=bandwidth,
         legend=False,
-        histlim=histlim
+        histlim=histlim,
     )
     plt.tight_layout()
-    camera.snap()
+    if camera is not None:
+        camera.snap()
     return camera
 
 
@@ -696,14 +730,16 @@ def plot_setup(pipeline):
 
     for label, ax in axs.items():
         ax.set_title(label, fontstyle="italic")
-    #axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
+    # axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
     axins = axs["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
     axins.axis("off")
     ax_cpy = axs
     axins_cpy = axins
     if pipeline.animate:
         camera = Camera(fig)
-    plt.suptitle(pipeline.plot_title, fontsize='x-large')
+    else:
+        camera = None
+    plt.suptitle(pipeline.plot_title, fontsize="x-large")
     return dict(
         camera=camera, axs=axs, axins=axins, ax_cpy=ax_cpy, axins_cpy=axins_cpy, fig=fig
     )

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from sklearn import metrics
+from copy import copy
 
 __all__ = ("Pipeline",)
 
@@ -18,7 +18,7 @@ from chex import Array
 from jax import jit
 from sklearn.model_selection import train_test_split
 
-from neos.utils import FormatPrinter, isnotebook
+from neos.utils import isnotebook
 
 in_jupyter = isnotebook()
 if in_jupyter:
@@ -93,14 +93,16 @@ class Pipeline(NamedTuple):
     animate: bool = True
     plot_name: str = "neos_demo.png"
     animation_name: str = "neos_demo.gif"
-    plot_title: str | None = None,
+    plot_title: str | None = (None,)
     plot_kwargs: dict | None = None
 
     def run(self):
         pyhf.set_backend("jax", default=True)
 
-        def pipeline(pars, data):
-            yields = self.yields_from_pars(pars, data, self.nn, **self.yield_kwargs)
+        def pipeline(pars, data, test=False):
+            ykw = copy(self.yield_kwargs) if self.yield_kwargs is not None else {}
+            ykw["use_kde"] = not test
+            yields = self.yields_from_pars(pars, data, self.nn, **ykw)
             model = self.model_from_yields(*yields)
             state: dict[str, Any] = {}
             state["yields"] = yields
@@ -189,7 +191,7 @@ class Pipeline(NamedTuple):
             "loss": [],
             "test_loss": [],
             "pull": [],
-            "pars": {}
+            "pars": {},
         }
         metric_keys = list(metrics.keys())
         epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
@@ -203,7 +205,7 @@ class Pipeline(NamedTuple):
                     params=params, state=state, data=batch_data
                 )
                 end = time.perf_counter()
-                test_loss, test_metrics = pipeline(pars=params, data=test)
+                test_loss, test_metrics = pipeline(pars=params, data=test, test=True)
                 t = end - start
 
                 for key in test_metrics:
@@ -220,31 +222,30 @@ class Pipeline(NamedTuple):
 
                 if in_jupyter:
                     display.clear_output(wait=True)
-                l = state.aux["loss"]
+                batch_loss = state.aux["loss"]
                 print(f"epoch {epoch_num}/{self.num_epochs}: {num_batches} batches")
                 print(f"batch {batch_num+1}/{num_batches} took {t:.4f}s.")
                 print()
-                print(f"batch loss: {l:.3g}")
+                print(f"batch loss: {batch_loss:.3g}")
                 print("metrics evaluated on test set:")
                 for k, v in test_metrics.items():
                     if k == "yields":
                         print("yields:")
-                        for label, yields in zip(['s','b','bup','bdown'], v):
-                            print('  ', end='')
-                            print(f'{label} = [', end='')
+                        for label, yields in zip(["s", "b", "bup", "bdown"], v):
+                            print("  ", end="")
+                            print(f"{label} = [", end="")
                             for i, count in enumerate(yields):
-                                if i==len(yields)-1:
-                                    print(f'{count:.3g}', end='')
+                                if i == len(yields) - 1:
+                                    print(f"{count:.3g}", end="")
                                 else:
-                                    print(f'{count:.3g}, ', end='')
-                            print(']')
-                                    
+                                    print(f"{count:.3g}, ", end="")
+                            print("]")
+
                     elif k == "pars":
                         continue
                     else:
-                        print(f'{k} = {v:.3g}')
+                        print(f"{k} = {v:.3g}")
                 print()
-            
 
                 if batch_num + epoch_num == 0:
                     plot_kwargs["camera"] = self.first_epoch_callback(
@@ -257,7 +258,7 @@ class Pipeline(NamedTuple):
                         nn=self.nn,
                         **self.yield_kwargs,
                         **plot_kwargs,
-                        **self.plot_kwargs
+                        **self.plot_kwargs,
                     )
                 elif batch_num + epoch_num == num_batches - 1 + self.num_epochs - 1:
                     plot_kwargs["camera"] = self.last_epoch_callback(
@@ -289,10 +290,6 @@ class Pipeline(NamedTuple):
             metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
         if self.animate:
             ani = plot_kwargs["camera"].animate()
-            ani.save(
-                f"{self.animation_name}", writer="imagemagick", fps=10
-            )
+            ani.save(f"{self.animation_name}", writer="imagemagick", fps=10)
             return ani, metrics
         return metrics
-        
-        
