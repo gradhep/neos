@@ -101,10 +101,10 @@ class Pipeline(NamedTuple):
     animate: bool = True
     plot_name: str = "neos_demo.png"
     animation_name: str = "neos_demo.gif"
-    plot_title: str | None = (None,)
+    plot_title: str | None = None
     plot_kwargs: dict | None = None
-    float_bin_edges: bool = (False,)
-    return_pars: bool = (False,)
+    float_bin_edges: bool = False
+    return_pars: bool = False
 
     def run(self):
         pyhf.set_backend("jax", default=True)
