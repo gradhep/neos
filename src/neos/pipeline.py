@@ -104,7 +104,8 @@ class Pipeline(NamedTuple):
     plot_title: str | None = None
     plot_kwargs: dict | None = None
     float_bin_edges: bool = False
-    return_pars: bool = False
+    return_pars: bool = (False,)
+    data_generator: dict[str, Any] | None = (None,)
 
     def run(self):
         pyhf.set_backend("jax", default=True)
@@ -164,36 +165,31 @@ class Pipeline(NamedTuple):
             state["loss"] = loss
             return loss, state
 
-        if self.data is not None:
-            split = train_test_split(
-                *self.data, test_size=self.test_size, random_state=self.random_state
-            )
-            train, test = split[::2], split[1::2]
-
-            num_train = train[0].shape[0]
-            num_complete_batches, leftover = divmod(num_train, self.batch_size)
-            num_batches = num_complete_batches + bool(leftover)
-
-            # batching mechanism
-            def data_stream():
-                rng = npr.RandomState(self.random_state)
-                while True:
-                    perm = rng.permutation(num_train)
-                    for i in range(num_batches):
-                        batch_idx = perm[
-                            i * self.batch_size : (i + 1) * self.batch_size
-                        ]
-                        yield [points[batch_idx] for points in train]
-
-            batches = data_stream()
+        if self.data is None:
+            data = self.data_generator["function"](self.data_generator["args"])
+        elif self.data is not None:
+            data = self.data
         else:
-            num_batches = 0
+            raise ValueError("data must be either None or an array")
+        split = train_test_split(
+            *data, test_size=self.test_size, random_state=self.random_state
+        )
+        train, test = split[::2], split[1::2]
 
-            def blank_data():
-                while True:
-                    yield None
+        num_train = train[0].shape[0]
+        num_complete_batches, leftover = divmod(num_train, self.batch_size)
+        num_batches = num_complete_batches + bool(leftover)
 
-            batches = blank_data()
+        # batching mechanism
+        def data_stream():
+            rng = npr.RandomState(self.random_state)
+            while True:
+                perm = rng.permutation(num_train)
+                for i in range(num_batches):
+                    batch_idx = perm[i * self.batch_size : (i + 1) * self.batch_size]
+                    yield [points[batch_idx] for points in train]
+
+        batches = data_stream()
 
         solver = jaxopt.OptaxSolver(
             fun=pipeline, opt=optax.adam(self.learning_rate), has_aux=True, jit=True
@@ -203,6 +199,7 @@ class Pipeline(NamedTuple):
 
         plot_kwargs = self.plot_setup(self)
 
+        epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
         metrics = {
             "CLs": [],
             "mu_uncert": [],
@@ -210,10 +207,10 @@ class Pipeline(NamedTuple):
             "loss": [],
             "test_loss": [],
             "pull": [],
-            "pars": {},
+            "epoch_grid": [],
+            # "pars": {},
         }
         metric_keys = list(metrics.keys())
-        epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
         for epoch_num in range(self.num_epochs):
             print(f"epoch {epoch_num}/{self.num_epochs}: {num_batches} batches")
             for batch_num in range(num_batches):
@@ -226,18 +223,17 @@ class Pipeline(NamedTuple):
                 end = time.perf_counter()
                 test_loss, test_metrics = pipeline(pars=params, data=test, test=True)
                 t = end - start
-                if self.return_pars:
-                    for key in test_metrics:
-                        if key == "loss":
-                            metrics["loss"].append(state.aux[key])
-                            metrics["test_loss"].append(test_loss)
-                        elif key == "pars":
-                            continue
+                for key in test_metrics:
+                    if key == "loss":
+                        metrics["loss"].append(state.aux[key])
+                        metrics["test_loss"].append(test_loss)
+                    elif key == "pars":
+                        continue
+                    else:
+                        if key in metric_keys:
+                            metrics[key].append(test_metrics[key])
                         else:
-                            if key in metric_keys:
-                                metrics[key].append(test_metrics[key])
-                            else:
-                                metrics[key] = test_metrics[key]
+                            metrics[key] = test_metrics[key]
 
                 if in_jupyter:
                     display.clear_output(wait=True)
@@ -308,7 +304,8 @@ class Pipeline(NamedTuple):
                             **plot_kwargs,
                             **self.plot_kwargs,
                         )
-            metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
+            if "pars" in metrics:
+                metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
         if self.animate:
             ani = plot_kwargs["camera"].animate()
             ani.save(f"{self.animation_name}", writer="imagemagick", fps=10)
