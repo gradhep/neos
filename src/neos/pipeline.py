@@ -26,7 +26,13 @@ if in_jupyter:
 
 
 @partial(
-    jit, static_argnames=["model", "return_mle_pars", "return_constrained_pars"]
+    jit,
+    static_argnames=[
+        "model",
+        "test_stat",
+        "return_mle_pars",
+        "return_constrained_pars",
+    ],
 )  # forward pass
 def hypotest(
     test_poi: float,
@@ -34,6 +40,7 @@ def hypotest(
     model: pyhf.Model,
     lr: float,
     bonly_pars: Array,
+    test_stat: str = "qmu",
     return_constrained_pars: bool = False,
 ) -> tuple[Array, Array] | Array:
     # hard-code 1 as inits for now
@@ -45,14 +52,15 @@ def hypotest(
         data, model, poi_condition=test_poi, init_pars=init_pars, lr=lr
     )
     mle_pars = bonly_pars
-    profile_likelihood = -2 * (
-        model.logpdf(conditional_pars, data)[0] - model.logpdf(mle_pars, data)[0]
-    )
+    if test_stat == "qmu":
+        profile_likelihood = -2 * (
+            model.logpdf(conditional_pars, data)[0] - model.logpdf(mle_pars, data)[0]
+        )
 
-    poi_hat = mle_pars[model.config.poi_index]
-    qmu = jnp.where(poi_hat < test_poi, profile_likelihood, 0.0)
+        poi_hat = mle_pars[model.config.poi_index]
+        tstat = jnp.where(poi_hat < test_poi, profile_likelihood, 0.0)
 
-    CLsb = 1 - pyhf.tensorlib.normal_cdf(jnp.sqrt(qmu))
+    CLsb = 1 - pyhf.tensorlib.normal_cdf(jnp.sqrt(tstat))
     altval = 0.0
     CLb = 1 - pyhf.tensorlib.normal_cdf(altval)
     CLs = CLsb / CLb
@@ -95,15 +103,26 @@ class Pipeline(NamedTuple):
     animation_name: str = "neos_demo.gif"
     plot_title: str | None = (None,)
     plot_kwargs: dict | None = None
+    float_bin_edges: bool = (False,)
+    return_pars: bool = (False,)
 
     def run(self):
         pyhf.set_backend("jax", default=True)
 
         def pipeline(pars, data, test=False):
+            if self.float_bin_edges:
+                nn_pars, bins = pars
+            elif not self.float_bin_edges:
+                nn_pars = pars
+                bins = self.yield_kwargs["bins"]
+            else:
+                raise ValueError("float_bin_edges must be either True or False")
+
             ykw = copy(self.yield_kwargs) if self.yield_kwargs is not None else {}
+            del ykw["bins"]
             ykw["use_kde"] = not test
-            yields = self.yields_from_pars(pars, data, self.nn, **ykw)
-            model = self.model_from_yields(*yields)
+            yields = self.yields_from_pars(nn_pars, data, self.nn, bins=bins, **ykw)
+            model = self.model_from_yields(*yields)  # , validate = test)
             state: dict[str, Any] = {}
             state["yields"] = yields
             bonly_pars = (
@@ -207,18 +226,18 @@ class Pipeline(NamedTuple):
                 end = time.perf_counter()
                 test_loss, test_metrics = pipeline(pars=params, data=test, test=True)
                 t = end - start
-
-                for key in test_metrics:
-                    if key == "loss":
-                        metrics["loss"].append(state.aux[key])
-                        metrics["test_loss"].append(test_loss)
-                    elif key == "pars":
-                        continue
-                    else:
-                        if key in metric_keys:
-                            metrics[key].append(test_metrics[key])
+                if self.return_pars:
+                    for key in test_metrics:
+                        if key == "loss":
+                            metrics["loss"].append(state.aux[key])
+                            metrics["test_loss"].append(test_loss)
+                        elif key == "pars":
+                            continue
                         else:
-                            metrics[key] = test_metrics[key]
+                            if key in metric_keys:
+                                metrics[key].append(test_metrics[key])
+                            else:
+                                metrics[key] = test_metrics[key]
 
                 if in_jupyter:
                     display.clear_output(wait=True)
@@ -248,18 +267,19 @@ class Pipeline(NamedTuple):
                 print()
 
                 if batch_num + epoch_num == 0:
-                    plot_kwargs["camera"] = self.first_epoch_callback(
-                        params,
-                        this_batch=test,
-                        metrics=metrics,
-                        maxN=self.num_epochs,
-                        batch_num=batch_num,
-                        epoch_grid=epoch_grid,
-                        nn=self.nn,
-                        **self.yield_kwargs,
-                        **plot_kwargs,
-                        **self.plot_kwargs,
-                    )
+                    if self.animate:
+                        plot_kwargs["camera"] = self.first_epoch_callback(
+                            params,
+                            this_batch=test,
+                            metrics=metrics,
+                            maxN=self.num_epochs,
+                            batch_num=batch_num,
+                            epoch_grid=epoch_grid,
+                            nn=self.nn,
+                            **self.yield_kwargs,
+                            **plot_kwargs,
+                            **self.plot_kwargs,
+                        )
                 elif batch_num + epoch_num == num_batches - 1 + self.num_epochs - 1:
                     plot_kwargs["camera"] = self.last_epoch_callback(
                         params,
@@ -275,21 +295,25 @@ class Pipeline(NamedTuple):
                         **self.plot_kwargs,
                     )
                 else:
-                    plot_kwargs["camera"] = self.per_epoch_callback(
-                        params,
-                        this_batch=test,
-                        metrics=metrics,
-                        maxN=self.num_epochs,
-                        batch_num=batch_num + (epoch_num * num_batches),
-                        nn=self.nn,
-                        epoch_grid=epoch_grid,
-                        **self.yield_kwargs,
-                        **plot_kwargs,
-                        **self.plot_kwargs,
-                    )
+                    if self.animate:
+                        plot_kwargs["camera"] = self.per_epoch_callback(
+                            params,
+                            this_batch=test,
+                            metrics=metrics,
+                            maxN=self.num_epochs,
+                            batch_num=batch_num + (epoch_num * num_batches),
+                            nn=self.nn,
+                            epoch_grid=epoch_grid,
+                            **self.yield_kwargs,
+                            **plot_kwargs,
+                            **self.plot_kwargs,
+                        )
             metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
         if self.animate:
             ani = plot_kwargs["camera"].animate()
             ani.save(f"{self.animation_name}", writer="imagemagick", fps=10)
             return ani, metrics
-        return metrics
+        if self.return_pars:
+            return metrics
+        else:
+            return test_metrics

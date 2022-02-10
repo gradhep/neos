@@ -56,7 +56,7 @@ def generate_data(
     return sig, bkg_nom, bkg_up, bkg_down
 
 
-def make_model(s, b_nom, b_up, b_down):
+def make_model(s, b_nom, b_up, b_down, validate=False):
     m = {
         "channels": [
             {
@@ -84,7 +84,7 @@ def make_model(s, b_nom, b_up, b_down):
             },
         ],
     }
-    return pyhf.Model(m, validate=False)
+    return pyhf.Model(m, validate=validate)
 
 
 def nn_summary_stat(
@@ -99,6 +99,7 @@ def nn_summary_stat(
     LUMI=10,
     return_preds=False,
     use_kde=True,
+    use_list=False,
 ):
     s_data, b_nom_data, b_up_data, b_down_data = data
 
@@ -141,6 +142,8 @@ def nn_summary_stat(
             np.histogram(nn_b_up, bins=bins)[0] * bkg_scale / num_points * LUMI,
             np.histogram(nn_b_down, bins=bins)[0] * bkg_scale / num_points * LUMI,
         ]
+        if use_list:
+            yields = [y.tolist() for y in yields]
     else:
         raise ValueError("use_kde must be True or False")
     if return_preds:
@@ -249,6 +252,39 @@ def plot(
     reflect=False,
     histlim=55,
 ):
+    if "Likelihood scan" in axs:
+        ax = axs["Likelihood scan"]
+        import cabinetry
+
+        model = make_model(*metrics["yields"])
+        bonly_pars = (
+            jnp.asarray(model.config.suggested_init())
+            .at[model.config.poi_index]
+            .set(0.0)
+            .tolist()
+        )
+        data_hf = model.expected_data(bonly_pars)
+        scan_results = cabinetry.fit.scan(
+            model, data_hf, "mu", par_bounds=[[-2, 10], [-2, 10]]
+        )
+        cabinetry.visualize.scan(scan_results, existing_ax=ax, legend=legend)
+    if "Expected limits" in axs:
+        # if batch_num != 0:
+        ax = axs["Expected limits"]
+        import cabinetry
+
+        model = make_model(*metrics["yields"])
+        bonly_pars = (
+            jnp.asarray(model.config.suggested_init())
+            .at[model.config.poi_index]
+            .set(0.0)
+            .tolist()
+        )
+        data_hf = model.expected_data(bonly_pars)
+
+        limit_results = cabinetry.fit.limit(model, data_hf, maxiter=1000)
+        cabinetry.visualize.limit(limit_results, existing_ax=ax, legend=legend)
+
     if "Data space" in axs:
         ax = axs["Data space"]
         g = np.mgrid[-5:5:101j, -5:5:101j]
@@ -297,9 +333,9 @@ def plot(
         ax.set_ylabel("y")
         if legend:
             ax.legend(fontsize="x-small", loc="upper right", fancybox=True)
+    x_grid = epoch_grid[: batch_num + 1]
     if "Losses" in axs:
         ax = axs["Losses"]
-        x_grid = epoch_grid[: batch_num + 1]
         ax.plot(
             epoch_grid[: batch_num + 1],
             metrics["loss"],
@@ -627,17 +663,25 @@ def last_epoch(
     #         ["Losses", "Metrics", "Nuisance pull"],
     #     ]
     # )
-    fig2, axs2 = plt.subplot_mosaic(
-        [
+    defaults = {
+        "layout": [
             ["Data space", "Histogram model"],
             ["Losses", "Metrics"],
         ]
-    )
+    }
+
+    for k in defaults:
+        if k in pipeline.plot_kwargs:
+            defaults[k] = pipeline.plot_kwargs[k]
+    fig2, axs2 = plt.subplot_mosaic(defaults["layout"])
 
     for label, ax in axs2.items():
         ax.set_title(label, fontstyle="italic")
-    axins2 = axs2["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
-    axins2.axis("off")
+    if "Histogram model" in axs2:
+        axins2 = axs2["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
+        axins2.axis("off")
+    else:
+        axins2 = None
     plot(
         axs=axs2,
         axins=axins2,
@@ -698,6 +742,17 @@ def per_epoch(
 def plot_setup(pipeline):
     plt.style.use("default")
 
+    defaults = {
+        "layout": [
+            ["Data space", "Histogram model"],
+            ["Losses", "Metrics"],
+        ]
+    }
+
+    for k in defaults:
+        if k in pipeline.plot_kwargs:
+            defaults[k] = pipeline.plot_kwargs[k]
+
     plt.rcParams.update(
         {
             "axes.labelsize": 13,
@@ -721,20 +776,18 @@ def plot_setup(pipeline):
     #         ["Losses", "Metrics", "Nuisance pull"],
     #     ]
     # )
-    fig, axs = plt.subplot_mosaic(
-        [
-            ["Data space", "Histogram model"],
-            ["Losses", "Metrics"],
-        ]
-    )
+    fig, axs = plt.subplot_mosaic(defaults["layout"])
 
     for label, ax in axs.items():
         ax.set_title(label, fontstyle="italic")
     # axs["Example KDE"].set_title("Example KDE (nominal bkg)", fontstyle="italic")
-    axins = axs["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
-    axins.axis("off")
+    if "Histogram model" in axs:
+        axins = axs["Histogram model"].inset_axes([0.33, 0.79, 0.3, 0.2])
+        axins.axis("off")
+        axins_cpy = axins
+    else:
+        axins = axins_cpy = None
     ax_cpy = axs
-    axins_cpy = axins
     if pipeline.animate:
         camera = Camera(fig)
     else:
