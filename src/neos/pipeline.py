@@ -210,6 +210,8 @@ class Pipeline(NamedTuple):
             "epoch_grid": [],
             # "pars": {},
         }
+        if self.return_pars:
+            metrics["pars"] = {}
         metric_keys = list(metrics.keys())
         for epoch_num in range(self.num_epochs):
             print(f"epoch {epoch_num}/{self.num_epochs}: {num_batches} batches")

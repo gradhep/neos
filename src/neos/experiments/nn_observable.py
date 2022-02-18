@@ -333,6 +333,8 @@ def plot(
         ax.set_ylabel("y")
         if legend:
             ax.legend(fontsize="x-small", loc="upper right", fancybox=True)
+
+        # ax.axis("off")
     x_grid = epoch_grid[: batch_num + 1]
     if "Losses" in axs:
         ax = axs["Losses"]
@@ -419,6 +421,7 @@ def plot(
         ax.set_ylabel("frequency")
         ax.set_xlabel("interval over nn output")
         ax.set_ylim(0, histlim)
+        # ax.axis("off")
 
         if legend:
             # Draw legend if we need
