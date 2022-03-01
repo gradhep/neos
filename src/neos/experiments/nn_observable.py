@@ -660,22 +660,17 @@ def last_epoch(
     plt.tight_layout()
     if camera is not None:
         camera.snap()
-    # fig2, axs2 = plt.subplot_mosaic(
-    #     [
-    #         ["Data space", "Histogram model", "Example KDE"],
-    #         ["Losses", "Metrics", "Nuisance pull"],
-    #     ]
-    # )
+
     defaults = {
         "layout": [
             ["Data space", "Histogram model"],
             ["Losses", "Metrics"],
         ]
     }
-
-    for k in defaults:
-        if k in pipeline.plot_kwargs:
-            defaults[k] = pipeline.plot_kwargs[k]
+    if pipeline.plot_kwargs is not None:
+        for k in defaults:
+            if k in pipeline.plot_kwargs:
+                defaults[k] = pipeline.plot_kwargs[k]
     fig2, axs2 = plt.subplot_mosaic(defaults["layout"])
 
     for label, ax in axs2.items():
@@ -751,10 +746,10 @@ def plot_setup(pipeline):
             ["Losses", "Metrics"],
         ]
     }
-
-    for k in defaults:
-        if k in pipeline.plot_kwargs:
-            defaults[k] = pipeline.plot_kwargs[k]
+    if pipeline.plot_kwargs is not None:
+        for k in defaults:
+            if k in pipeline.plot_kwargs:
+                defaults[k] = pipeline.plot_kwargs[k]
 
     plt.rcParams.update(
         {
@@ -773,12 +768,6 @@ def plot_setup(pipeline):
 
     plt.rc("figure", dpi=150)
 
-    # fig, axs = plt.subplot_mosaic(
-    #     [
-    #         ["Data space", "Histogram model", "Example KDE"],
-    #         ["Losses", "Metrics", "Nuisance pull"],
-    #     ]
-    # )
     fig, axs = plt.subplot_mosaic(defaults["layout"])
 
     for label, ax in axs.items():

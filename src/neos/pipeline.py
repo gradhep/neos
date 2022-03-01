@@ -197,6 +197,8 @@ class Pipeline(NamedTuple):
         state = solver.init_state(init_params=self.init_pars)
         params = self.init_pars
 
+        pkw = copy(self.plot_kwargs) if self.plot_kwargs is not None else {}
+        pkw["histlim"] = 100 if "histlim" not in pkw else pkw["histlim"]
         plot_kwargs = self.plot_setup(self)
 
         epoch_grid = jnp.linspace(0, self.num_epochs, num_batches * self.num_epochs)
@@ -276,7 +278,7 @@ class Pipeline(NamedTuple):
                             nn=self.nn,
                             **self.yield_kwargs,
                             **plot_kwargs,
-                            **self.plot_kwargs,
+                            **pkw,
                         )
                 elif batch_num + epoch_num == num_batches - 1 + self.num_epochs - 1:
                     plot_kwargs["camera"] = self.last_epoch_callback(
@@ -290,7 +292,7 @@ class Pipeline(NamedTuple):
                         pipeline=self,
                         **self.yield_kwargs,
                         **plot_kwargs,
-                        **self.plot_kwargs,
+                        **pkw,
                     )
                 else:
                     if self.animate:
@@ -304,7 +306,7 @@ class Pipeline(NamedTuple):
                             epoch_grid=epoch_grid,
                             **self.yield_kwargs,
                             **plot_kwargs,
-                            **self.plot_kwargs,
+                            **pkw,
                         )
             if "pars" in metrics:
                 metrics["pars"]["post-epoch-" + str(epoch_num)] = test_metrics["pars"]
