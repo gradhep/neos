@@ -11,7 +11,10 @@ write_to = "src/neos/_version.py"
 minversion = "6.0"
 addopts = ["-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true
-filterwarnings = ["error"]
+filterwarnings = [
+    "error",
+    "ignore:the imp module is deprecated:DeprecationWarning",
+]
 testpaths = [
     "tests",
 ]
@@ -23,7 +26,7 @@ all = true
 
 [tool.mypy]
 files = "src"
-python_version = "3.6"
+python_version = "3.7"
 warn_unused_configs = true
 
 disallow_any_generics = true

@@ -1,5 +1,5 @@
-import neos as m
+import neos
 
 
 def test_version():
-    assert m.__version__
+    assert neos.__version__
