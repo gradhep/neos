@@ -53,10 +53,11 @@ def generate_data(
         jnp.asarray([[1, 0], [0, 1]]),
         shape=(num_points,),
     )
-    return sig, bkg_nom, bkg_up, bkg_down
+    return dict(data = [sig, bkg_nom, bkg_up, bkg_down])
 
 
-def make_model(s, b_nom, b_up, b_down, validate=False):
+def make_model(yields, validate=False):
+    sig, bkg_nom, bkg_up, bkg_down = yields
     m = {
         "channels": [
             {
@@ -64,19 +65,19 @@ def make_model(s, b_nom, b_up, b_down, validate=False):
                 "samples": [
                     {
                         "name": "signal",
-                        "data": s,
+                        "data": sig,
                         "modifiers": [
                             {"name": "mu", "type": "normfactor", "data": None},
                         ],
                     },
                     {
                         "name": "background",
-                        "data": b_nom,
+                        "data": bkg_nom,
                         "modifiers": [
                             {
                                 "name": "correlated_bkg_uncertainty",
                                 "type": "histosys",
-                                "data": {"hi_data": b_up, "lo_data": b_down},
+                                "data": {"hi_data": bkg_up, "lo_data": bkg_down},
                             },
                         ],
                     },
@@ -84,12 +85,12 @@ def make_model(s, b_nom, b_up, b_down, validate=False):
             },
         ],
     }
-    return pyhf.Model(m, validate=validate)
+    return dict(model = pyhf.Model(m, validate=validate))
 
 
 def nn_summary_stat(
     pars,
-    data,
+    point_data,
     nn,
     bandwidth,
     bins,
@@ -101,7 +102,7 @@ def nn_summary_stat(
     use_kde=True,
     use_list=False,
 ):
-    s_data, b_nom_data, b_up_data, b_down_data = data
+    s_data, b_nom_data, b_up_data, b_down_data = point_data
 
     preds = nn_s, nn_b_nom, nn_b_up, nn_b_down = (
         nn(pars, s_data).ravel(),
@@ -148,7 +149,7 @@ def nn_summary_stat(
         raise ValueError("use_kde must be True or False")
     if return_preds:
         return yields, preds
-    return yields
+    return dict(yields=yields)
 
 
 def make_kde(data, bw):
