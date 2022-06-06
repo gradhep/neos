@@ -2,14 +2,22 @@ from __future__ import annotations
 
 __all__ = ('loss_from_model', 'hists_from_nn',)
 
-import relaxed
+from functools import partial
+from typing import Any, Callable
+
 import jax.numpy as jnp
 import pyhf
-from typing import Callable, Any
-import pyhf
-from functools import partial
-from neos.losses import poi_uncert, discovery_significance, cls_value, generalised_variance
+import relaxed
+
+from neos.losses import (
+    cls_value,
+    discovery_significance,
+    generalised_variance,
+    poi_uncert,
+)
+
 Array = jnp.ndarray
+
 
 def hists_from_nn(
     pars: Array,
@@ -44,6 +52,7 @@ def hists_from_nn(
         for k, v in nn_output.items()
     }
     return hists
+
 
 def loss_from_model(
     model: pyhf.Model,

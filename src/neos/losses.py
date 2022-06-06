@@ -2,9 +2,9 @@ from __future__ import annotations
 
 __all__ = ("poi_uncert", "discovery_significance", "cls_value", "generalised_variance", "bce",)
 
-import relaxed
 import jax.numpy as jnp
 import pyhf
+import relaxed
 
 Array = jnp.ndarray
 
@@ -71,7 +71,7 @@ def sigmoid_cross_entropy_with_logits(preds, labels):
     )
 
 
-def bce_loss(data, nn, pars):
+def bce(data, nn, pars):
     preds = {k: nn(pars, data[k]).ravel() for k in data}
     bkg = jnp.concatenate([preds[k] for k in preds if "sig" not in k])
     sig = preds["sig"]
