@@ -1,6 +1,12 @@
 from __future__ import annotations
 
-__all__ = ("poi_uncert", "discovery_significance", "cls_value", "generalised_variance", "bce",)
+__all__ = (
+    "poi_uncert",
+    "discovery_significance",
+    "cls_value",
+    "generalised_variance",
+    "bce",
+)
 
 import jax.numpy as jnp
 import pyhf

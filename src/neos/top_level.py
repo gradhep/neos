@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-__all__ = ('loss_from_model', 'hists_from_nn',)
+__all__ = (
+    "loss_from_model",
+    "hists_from_nn",
+)
 
 from functools import partial
 from typing import Any, Callable
