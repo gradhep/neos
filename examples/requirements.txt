@@ -1,0 +1,3 @@
+celluloid
+git+http://github.com/scikit-hep/pyhf.git@make_difffable_model_ctor
+plothelp
