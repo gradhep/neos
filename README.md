@@ -1,16 +1,20 @@
-# neos
-> ~neural~ nice end-to-end optimized statistics
-
-[![Actions Status][actions-badge]][actions-link]
-[![Documentation Status][rtd-badge]][rtd-link]
-[![Code style: black][black-badge]][black-link]
-
-[![PyPI version][pypi-version]][pypi-link]
-[![PyPI platforms][pypi-platforms]][pypi-link]
-
-[![DOI](https://zenodo.org/badge/235776682.svg)](https://zenodo.org/badge/latestdoi/235776682)
-
-
+<p align="center">
+  <img src="nbs/assets/neos_logo.png" alt="neos logo" width="125"><br>
+  neural end-to-end-optimised summary statistics
+  
+  <br>
+  <a href="https://arxiv.org/abs/2203.05570">arxiv.org/abs/2203.05570</a>
+  <br>
+  <a href="https://github.com/gradhep/neos/actions">
+    <img alt="GitHub Workflow Status" src="https://github.com/gradhep/neos/workflows/CI/badge.svg">
+  </a>
+  <a href="https://zenodo.org/badge/latestdoi/235776682">
+    <img alt="Zenodo DOI" src="https://zenodo.org/badge/235776682.svg">
+  </a>
+  <a href="https://mybinder.org/v2/gh/gradhep/neos/main?labpath=demo.ipynb">
+    <img alt="Binder" src="https://mybinder.org/badge_logo.svg">
+  </a>
+</p>
 
 
 
@@ -33,15 +37,9 @@
 [rtd-link]:                 https://neos.readthedocs.io/en/latest/?badge=latest
 [sk-badge]:                 https://scikit-hep.org/assets/images/Scikit--HEP-Project-blue.svg
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo.ipynb)
-
-<img src="nbs/assets/neos_logo.png" alt="neos logo" width="250">
-
 ![](animation.gif)
 
 ## About
-
-Run the binder demo :) -> [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/gradhep/neos/main?filepath=demo.ipynb)
 
 Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/) and [`pyhf`](https://github.com/scikit-hep/pyhf)) to differentiate through a high-energy physics analysis workflow, including the construction of the frequentist profile likelihood.
 
