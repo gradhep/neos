@@ -39,6 +39,20 @@
 
 ![](animation.gif)
 
+## Cite
+
+Please cite our newly released paper:
+
+```
+@article{neos,
+    Author = {Nathan Simpson and Lukas Heinrich},
+    Title = {neos: End-to-End-Optimised Summary Statistics for High Energy Physics},
+    Year = {2022},
+    Eprint = {arXiv:2203.05570},
+    doi = {10.48550/arXiv.2203.05570},
+    url = {https://doi.org/10.48550/arXiv.2203.05570}
+}
+```
 ## About
 
 Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/) and [`pyhf`](https://github.com/scikit-hep/pyhf)) to differentiate through a high-energy physics analysis workflow, including the construction of the frequentist profile likelihood.
