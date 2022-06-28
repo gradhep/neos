@@ -12,3 +12,17 @@ version: v0.2.0
 date-released: 2021-01-12
 url: "https://github.com/gradhep/neos"
 doi: 10.5281/zenodo.6351423
+references:
+  - type: article
+    authors:
+    - family-names: Simpson
+      given-names: Nathan
+      orcid: https://orcid.org/0000-0003-4188-829
+    - family-names: "Heinrich"
+      given-names: "Lukas"
+      orcid: "https://orcid.org/0000-0002-4048-7584"
+      affiliation: "TU Munich"
+    title: "neos: End-to-End-Optimised Summary Statistics for High Energy Physics"
+    doi: 10.48550/arXiv.2203.05570
+    url: "https://doi.org/10.48550/arXiv.2203.05570"
+    year: 2022
