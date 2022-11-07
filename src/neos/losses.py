@@ -77,10 +77,13 @@ def sigmoid_cross_entropy_with_logits(preds, labels):
     )
 
 
-def bce(data, nn, pars):
+def bce(data, nn, pars, with_aug=False, signal_label="sig", background_label="bkg"):
     preds = {k: nn(pars, data[k]).ravel() for k in data}
-    bkg = jnp.concatenate([preds[k] for k in preds if "sig" not in k])
-    sig = preds["sig"]
+    if with_aug:
+        bkg = jnp.concatenate([preds[k] for k in preds if signal_label not in k])
+    else:
+        bkg = preds[background_label]
+    sig = preds[signal_label]
     labels = jnp.concatenate([jnp.ones_like(sig), jnp.zeros_like(bkg)])
     return sigmoid_cross_entropy_with_logits(
         jnp.concatenate(list(preds.values())).ravel(), labels
