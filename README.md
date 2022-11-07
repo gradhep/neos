@@ -1,7 +1,7 @@
 <p align="center">
   <img src="nbs/assets/neos_logo.png" alt="neos logo" width="125"><br>
   neural end-to-end-optimised summary statistics
-  
+
   <br>
   <a href="https://arxiv.org/abs/2203.05570">arxiv.org/abs/2203.05570</a>
   <br>

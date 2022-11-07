@@ -10,8 +10,8 @@ from typing import Any, Callable
 
 import jax.numpy as jnp
 import pyhf
-import relaxed
 
+import relaxed
 from neos.losses import (
     cls_value,
     discovery_significance,
