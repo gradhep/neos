@@ -21,5 +21,5 @@ I've just released [`relaxed` v0.3.0](https://github.com/gradhep/relaxed), which
 
 ## reaching out
 
-If you're interested in working on this, please reach out to me through 
+If you're interested in working on this, please reach out to me through [Mattermost](https://mattermost.web.cern.ch/signup_user_complete/?id=zf7w5rb1miy85xsfjqm68q9hwr&md=link&sbr=su), or by email.
 
