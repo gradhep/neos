@@ -1,7 +1,6 @@
 <p align="center">
   <img src="nbs/assets/neos_logo.png" alt="neos logo" width="125"><br>
   neural end-to-end-optimised summary statistics
-
   <br>
   <a href="https://arxiv.org/abs/2203.05570">arxiv.org/abs/2203.05570</a>
   <br>
@@ -39,6 +38,20 @@
 
 ![](animation.gif)
 
+## About
+
+Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/) and [`pyhf`](https://github.com/scikit-hep/pyhf)) to differentiate through a high-energy physics analysis workflow, including the construction of the frequentist profile likelihood.
+
+If you're more of a video person, see [this talk](https://www.youtube.com/watch?v=3P4ZDkbleKs) given by [Nathan](https://github.com/phinate) on the broader topic of differentiable programming in high-energy physics, which also covers `neos`.
+
+## You want to apply this to your analysis?
+
+Some things need to happen first. [Click here for more info -- I wrote them up!](applying_neos.md)
+
+## Have questions?
+
+Do you want to chat about `neos`? Join us in Mattermost: [![Mattermost](https://img.shields.io/badge/chat-mattermost-blue.svg)](https://mattermost.web.cern.ch/signup_user_complete/?id=zf7w5rb1miy85xsfjqm68q9hwr&md=link&sbr=su)
+
 ## Cite
 
 Please cite our newly released paper:
@@ -53,11 +66,7 @@ Please cite our newly released paper:
     url = {https://doi.org/10.48550/arXiv.2203.05570}
 }
 ```
-## About
 
-Leverages the shoulders of giants ([`jax`](https://github.com/google/jax/) and [`pyhf`](https://github.com/scikit-hep/pyhf)) to differentiate through a high-energy physics analysis workflow, including the construction of the frequentist profile likelihood.
-
-If you're more of a video person, see [this talk](https://www.youtube.com/watch?v=3P4ZDkbleKs) given by [Nathan](https://github.com/phinate) on the broader topic of differentiable programming in high-energy physics, which also covers `neos`.
 
 ## Example usage -- train a neural network to optimize an expected p-value
 
