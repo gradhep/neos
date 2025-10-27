@@ -10,7 +10,6 @@ __all__ = (
 
 import jax.numpy as jnp
 import pyhf
-
 import relaxed
 
 Array = jnp.ndarray
